@@ -14,78 +14,30 @@ robots.txt · sitemap.xml
 
 ---
 
-## ⚠️ Antes de publicar — 3 ajustes obrigatórios
+## Identidade visual e conteúdo: tudo vem do original
 
-### 1. Dados de contato (placeholders!)
+Com o acesso liberado, baixei direto de `lp.newcabos.com.br` e `newcabos.com.br`:
 
-Abra `assets/js/app.js` e troque o bloco `CONFIG` no topo do arquivo:
-
-```js
-const CONFIG = {
-  whatsapp: '5515000000000',      // ← só dígitos, com DDI 55
-  telefone: '+551530000000',      // ← formato E.164 para o link tel:
-  telefoneLabel: '(15) 3000-0000',
-  email: 'comercial@newcabos.com.br',
-};
-```
-
-Esses valores alimentam **todos** os botões de WhatsApp, telefone e e-mail da
-página, inclusive o envio do formulário. Não achei os números completos em
-fontes públicas, então deixei propositalmente um placeholder óbvio em vez de
-chutar um número errado.
-
-### 2. Conferir as afirmações técnicas
-
-O que está na página veio de pesquisa pública sobre a New Cabos (site
-institucional, perfis da empresa e catálogos do setor):
-
-| Afirmação na página | Situação |
+| O que | De onde veio |
 |---|---|
-| Fábrica em Sorocaba-SP, 100% nacional | confirmado em fontes públicas |
-| Bitolas 4, 6, 10 e 16 mm² | confirmado |
-| Cobre eletrolítico estanhado | confirmado |
-| Dupla camada de isolação termofixa | confirmado |
-| Livre de halogênio, retardante à chama, baixa fumaça, resistente a UV | confirmado |
-| Marcação metro a metro | confirmado |
-| "Processos estruturados conforme a ISO 9001" | confirmado — mantive a redação exata da fonte; **se a empresa for certificada**, vale trocar por "certificada ISO 9001" |
-| **1500 V CC** | padrão do mercado para cabo solar — **confirmar na ficha técnica de vocês** |
-| **Correntes máximas, diâmetros e pesos** (`GAUGES` em `app.js`) | valores de referência de catálogo do setor — **substituir pelos números reais da ficha técnica** |
-| **Endereço e CNPJ no rodapé** | vieram de bases públicas de CNPJ — **confirmar** antes de publicar |
+| `assets/img/logo-newcabos.png` · `icone-newcabos.png` · `favicon.png` | logo oficial do site institucional |
+| `assets/img/hero-cabo.webp` | imagem de topo da LP (recortada no produto) |
+| `assets/img/fabrica.jpg` | foto real da fábrica, da LP |
+| `assets/img/rolos.png` | foto dos rolos preto/vermelho/verde |
+| WhatsApp `(15) 99755-6534` e `contato@newcabos.com.br` | rodapé da LP |
+| 5.000 m², entrega em 24h, conectores MC4, marca própria | textos da LP |
 
-Os números de ampacidade/diâmetro/peso ficam todos no objeto `GAUGES` no topo
-de `assets/js/app.js`. Um único lugar alimenta o hero, as abas de produto e a
-calculadora.
+A paleta saiu dos pixels do próprio logo: **laranja `#F5A11E` / `#F08000`** (o raio)
+e **azul `#1E7FE0` / `#10233D`** (o cabo em volta). Ficam em `:root`, no topo do
+`styles.css`. A base da página é clara, como a LP original.
 
-### 3. Imagens (slots já prontos)
+## Ainda vale conferir
 
-A página tem **dois slots de imagem** esperando as fotos reais. Enquanto o
-arquivo não existe, aparece uma arte vetorial de base; assim que o arquivo é
-colocado na pasta, a foto assume sozinha. **Não é preciso tocar em código** —
-só salvar o arquivo com o nome certo:
-
-| Arquivo | Onde aparece | Proporção ideal |
-|---|---|---|
-| `assets/img/fabrica.jpg` | seção "A fábrica" | ~1200×420 (larga) |
-| `assets/img/obra.jpg` | seção "Escolha o seu cenário" | ~1200×300 (faixa) |
-
-As legendas ficam no `index.html`, dentro de cada `<figcaption>`. Para
-trocar `.jpg` por `.webp` ou `.png`, ajuste o `src` do `<img>` no slot.
-
-Para adicionar um slot novo em qualquer seção, copie um bloco `<figure class="shot">`
-existente e troque o `src`, o `alt` e a legenda.
-
-> **Por que não usei as imagens do site original:** a política de rede deste
-> ambiente bloqueia `newcabos.com.br` e `lp.newcabos.com.br` (403 no CONNECT),
-> junto com qualquer outra fonte externa de imagem. Não consegui baixar nada.
-> Basta enviar os arquivos ou liberar o domínio na policy do ambiente.
-
-### 4. Depoimentos
-
-Não inventei depoimentos de clientes. O bloco pronto está **comentado** no
-`index.html`, logo acima da seção de orçamento — é só colar 3 falas reais (com
-nome, empresa, cidade e autorização) e descomentar.
-
----
+- **Números técnicos** das bitolas (corrente, diâmetro, peso) continuam sendo
+  referência de catálogo do setor, não a ficha técnica de vocês. Estão todos no
+  objeto `GAUGES`, no topo de `assets/js/app.js`.
+- **Depoimentos**: não inventei nenhum. O bloco pronto está comentado no
+  `index.html`, acima da seção de orçamento. É colar 3 falas reais e descomentar.
 
 ## O que mudou em relação à LP antiga
 
@@ -94,10 +46,14 @@ solar — o integrador que volta na obra de graça — em vez de falar de si mes
 O cabo deixou de ser descrito como produto e passou a ser descrito como risco:
 2% do orçamento, 100% do retrabalho.
 
-**Visual.** A página não usa nenhuma "pill" (aquelas cápsulas arredondadas com
-fundo e borda). Os rótulos de seção viraram texto com filete, os status viraram
-texto com marcador, e todo controle — botões, abas, seletores — usa canto
-arredondado de 10–12px em vez de raio total.
+**Linguagem.** A copy foi reescrita inteira para leitura simples — frases curtas,
+palavras do dia a dia, sem jargão. "Queda de tensão" virou "energia perdida no
+caminho"; "bitola" virou "grossura do cabo"; "condutor de cobre eletrolítico
+estanhado" virou "fio de cobre com banho de estanho". Onde o termo técnico é
+inevitável, ele vem explicado na frase seguinte.
+
+**Visual.** Nenhuma "pill" (cápsula arredondada). Rótulos de seção são texto com
+filete, status são texto com marcador, e os controles usam canto de 10–12px.
 
 **Elementos interativos** (todos em JS puro, sem biblioteca):
 

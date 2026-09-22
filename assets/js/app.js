@@ -6,12 +6,11 @@
    Os valores abaixo são PLACEHOLDERS — troque pelos reais.
    ========================================================= */
 const CONFIG = {
-  // Somente dígitos, com DDI 55. Ex.: '5515996040000'
-  whatsapp: '5515000000000',
-  // Formato E.164 para o link tel:
-  telefone: '+551530000000',
-  telefoneLabel: '(15) 3000-0000',
-  email: 'comercial@newcabos.com.br',
+  // Dados reais, extraídos da LP oficial (lp.newcabos.com.br)
+  whatsapp: '5515997556534',
+  telefone: '+5515997556534',
+  telefoneLabel: '(15) 99755-6534',
+  email: 'contato@newcabos.com.br',
   empresa: 'New Cabos',
 };
 
@@ -29,18 +28,19 @@ const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').match
    ========================================================= */
 const GAUGES = {
   4:  { amp: 55,  diam: '5,6 mm', peso: '62 g/m',  strands: 56,  viz: 104,
-        uso: 'Ramais de string em sistemas residenciais e pequenos comerciais, com distâncias curtas até o inversor.',
-        badge: 'Mais usada em residencial' },
+        uso: 'O mais usado em casa e em comércio pequeno, quando o inversor fica perto das placas.',
+        badge: 'O queridinho das obras em casa' },
   6:  { amp: 70,  diam: '6,4 mm', peso: '85 g/m',  strands: 84,  viz: 120,
-        uso: 'A bitola padrão do mercado fotovoltaico brasileiro. Cobre a maior parte das strings residenciais e comerciais.',
-        badge: 'Campeã de vendas' },
+        uso: 'O mais vendido do Brasil. Serve pra quase toda obra em casa e em comércio.',
+        badge: 'O mais vendido' },
   10: { amp: 98,  diam: '8,0 mm', peso: '138 g/m', strands: 80,  viz: 142,
-        uso: 'Distâncias longas, troncos de string e sistemas comerciais onde a queda de tensão começa a pesar.',
-        badge: 'Para distâncias longas' },
+        uso: 'Pra quando o inversor fica longe das placas, ou quando passa bastante energia junta.',
+        badge: 'Pra distância grande' },
   16: { amp: 132, diam: '9,6 mm', peso: '210 g/m', strands: 126, viz: 164,
-        uso: 'Troncos de usina, corredores de string combiner e projetos industriais de maior corrente.',
-        badge: 'Usina e industrial' },
+        uso: 'Pra usina e obra industrial, onde passa muita energia de uma vez só.',
+        badge: 'Pra usina e indústria' },
 };
+
 
 /* =========================================================
    1. HEADER, MENU, PROGRESSO, REVEAL
@@ -135,9 +135,9 @@ const GAUGES = {
    ========================================================= */
 (function contatos() {
   const msgs = {
-    fab:     `Olá! Vim pela página da ${CONFIG.empresa} e quero falar sobre cabo solar.`,
-    direto:  `Olá! Quero um orçamento de cabo solar da ${CONFIG.empresa}.`,
-    footer:  `Olá! Vim pelo site da ${CONFIG.empresa} e gostaria de informações sobre cabo solar.`,
+    fab:     `Oi! Vim pelo site da ${CONFIG.empresa} e queria falar sobre cabo solar.`,
+    direto:  `Oi! Queria um preço de cabo solar da ${CONFIG.empresa}.`,
+    footer:  `Oi! Vim pelo site da ${CONFIG.empresa} e queria mais informações sobre cabo solar.`,
   };
   $$('[data-wa]').forEach(a => { a.href = waLink(msgs[a.dataset.wa] || msgs.direto); a.target = '_blank'; a.rel = 'noopener'; });
   $$('[data-tel]').forEach(a => { a.href = `tel:${CONFIG.telefone}`; a.textContent = a.textContent.trim() === 'Telefone comercial' || a.textContent.trim() === 'Telefone' ? CONFIG.telefoneLabel : a.textContent; });
@@ -155,7 +155,7 @@ const GAUGES = {
 
   const apply = (g) => {
     const d = GAUGES[g];
-    label.textContent = `${g} mm² · 1500 V`;
+    label.textContent = `${g} mm²`;
     print.textContent = `NEW CABOS · ${g}mm² · 1500V · 0001 m`;
     $('[data-stat=amp]',  stats).textContent = `${d.amp} A`;
     $('[data-stat=diam]', stats).textContent = d.diam;
@@ -177,34 +177,35 @@ const GAUGES = {
    ========================================================= */
 const LAYERS = {
   conductor: {
-    title: 'Condutor de cobre eletrolítico',
-    sub: 'O caminho da energia',
-    text: 'Fios finos de cobre eletrolítico encordoados. Quanto mais fios e mais finos, mais flexível é o cabo — e menos ele briga com você na hora de passar pela calha, contornar a estrutura e chegar no conector.',
-    specs: ['Cobre eletrolítico de primeira linha', 'Construção flexível, pensada para telhado', 'Seções de 4, 6, 10 e 16 mm²'],
-    risk: 'Condutor rígido ou com seção real abaixo da nominal aquece mais, cai de tensão mais e trinca nos pontos de dobra.',
+    title: 'O fio de cobre',
+    sub: 'Por onde a energia passa',
+    text: 'Lá no meio ficam vários fios finos de cobre, trançados juntos. Quanto mais fios e mais fininhos, mais o cabo dobra fácil — e menos ele briga com você na hora de passar pela calha e chegar no conector.',
+    specs: ['Cobre de boa qualidade', 'Bem flexível, feito pra trabalhar em telhado', 'Vem em 4, 6, 10 e 16 mm²'],
+    risk: 'Cabo duro é um sofrimento de instalar e racha nas dobras. E se o cobre for menos do que deveria, ele esquenta.',
   },
   tin: {
-    title: 'Estanhagem dos fios',
-    sub: 'O detalhe que ninguém vê e todo mundo sente',
-    text: 'Cada fio de cobre recebe uma camada de estanho. É uma proteção contra oxidação — e ela importa principalmente onde o cabo é cortado e crimpado no conector, que é justamente o ponto mais vulnerável de toda a string.',
-    specs: ['Protege o cobre da oxidação ao longo dos anos', 'Mantém a resistência de contato estável na crimpagem', 'Reduz o risco de ponto quente no conector'],
-    risk: 'Cobre nu oxida na ponta. A resistência sobe, o conector aquece, o inversor acusa falha de isolação — e o chamado é seu.',
+    title: 'O banho de estanho',
+    sub: 'O detalhe que ninguém vê',
+    text: 'Cada fio de cobre recebe uma camada fininha de estanho por cima. Isso protege o cobre de escurecer com o tempo — principalmente na ponta, onde você aperta o conector, que é o lugar que mais sofre.',
+    specs: ['Protege o cobre de escurecer', 'Mantém a ligação firme no conector', 'Evita que o conector esquente'],
+    risk: 'Cobre sem proteção escurece na ponta. O conector esquenta, o inversor acusa erro — e o chamado cai pra você.',
   },
   insulation: {
-    title: 'Primeira camada de isolação',
-    sub: 'A barreira dielétrica',
-    text: 'Composto termofixo extrudado diretamente sobre o condutor. Termofixo, diferente do termoplástico comum, não amolece quando a temperatura sobe — e a temperatura sobe muito num telhado de telha metálica ao meio-dia.',
-    specs: ['Composto termofixo, estável sob temperatura', 'Rigidez dielétrica para tensão nominal de 1500 V CC', 'Livre de halogênio, retardante à chama e baixa emissão de fumaça'],
-    risk: 'Isolação de PVC comum amolece no calor, deforma sob pressão da abraçadeira e reduz a distância de isolação entre condutor e estrutura.',
+    title: 'A camada de dentro',
+    sub: 'Segura a energia no lugar',
+    text: 'É a primeira capa, aplicada direto em cima do cobre. Ela é feita de um material que não amolece quando esquenta — e telhado de metal ao meio-dia esquenta muito.',
+    specs: ['Não amolece no calor', 'Feita pra 1500 V, a tensão da energia solar', 'Solta pouca fumaça e não espalha fogo'],
+    risk: 'Capa comum amolece no calor e se deforma embaixo da abraçadeira. Aí a proteção fica mais fina do que deveria.',
   },
   jacket: {
-    title: 'Capa externa + marcação metro a metro',
-    sub: 'A pele que enfrenta 20 verões',
-    text: 'A segunda camada é a que leva sol, chuva, poeira e dilatação térmica todos os dias. Nela vai impressa a identificação do cabo e a metragem sequencial — o número que permite você conferir na chegada e controlar o consumo de cabo na obra.',
-    specs: ['Resistente à radiação UV e a intempéries', 'Marcação sequencial impressa metro a metro', 'Cores preto e vermelho para identificação de polaridade'],
-    risk: 'Sem proteção UV adequada a capa resseca e trinca em poucos anos. Sem marcação, você nunca sabe se o rolo de 100 m tinha mesmo 100 m.',
+    title: 'A capa de fora',
+    sub: 'A que enfrenta 25 verões',
+    text: 'É a parte que toma sol, chuva e poeira todo dia. Nela também vem escrito o nome do cabo e o número do metro — que é o que deixa você conferir o rolo assim que ele chega na obra.',
+    specs: ['Feita pra tomar sol sem rachar', 'Tem o número do metro escrito nela', 'Vem em preto, vermelho e verde'],
+    risk: 'Capa fraca resseca e racha em poucos anos. E sem número escrito, você nunca sabe se o rolo de 100 m tinha mesmo 100 m.',
   },
 };
+
 
 (function anatomia() {
   const body = $('#anaBody'), svg = $('.anatomy__svg');
@@ -263,38 +264,39 @@ const LAYERS = {
    ========================================================= */
 const TIMELINE = {
   1: {
-    bad:  { lvl: 'ok', label: 'Em ordem', health: 96,
-            txt: 'Recém-instalado, ninguém vê diferença. É exatamente por isso que a escolha do cabo parece não importar no dia da compra.',
-            cost: 'Custo até aqui: zero — e a sensação de ter economizado.' },
-    good: { lvl: 'ok', label: 'Em ordem', health: 100,
-            txt: 'Recém-instalado. A metragem bateu com a nota na conferência do rolo, e a equipe fechou a obra sem sobra perdida.',
-            cost: 'Custo até aqui: zero — com metragem conferida.' },
+    bad:  { lvl: 'ok', label: 'Tudo bem', health: 96,
+            txt: 'Acabou de ser instalado. Ninguém vê diferença nenhuma. É por isso que, na hora de comprar, parece que o cabo não importa.',
+            cost: 'Até aqui não custou nada — e ainda deu a sensação de ter economizado.' },
+    good: { lvl: 'ok', label: 'Tudo bem', health: 100,
+            txt: 'Acabou de ser instalado. A metragem bateu com a nota na hora de conferir o rolo, e a equipe terminou sem sobra perdida.',
+            cost: 'Até aqui não custou nada — e a metragem fechou certinho.' },
   },
   3: {
-    bad:  { lvl: 'warn', label: 'Atenção', health: 62,
-            txt: 'A capa começa a endurecer sob radiação UV e ciclos de calor. Nos pontos de dobra e sob abraçadeira aparecem as primeiras microtrincas.',
-            cost: 'Primeira visita técnica não faturada.' },
-    good: { lvl: 'ok', label: 'Em ordem', health: 97,
-            txt: 'Composto termofixo resistente a UV: a capa mantém a flexibilidade e a isolação segue íntegra mesmo nos pontos de maior esforço.',
-            cost: 'Nenhum chamado aberto.' },
+    bad:  { lvl: 'warn', label: 'Começando a dar problema', health: 62,
+            txt: 'O sol já endureceu a capa. Onde o cabo dobra e onde a abraçadeira aperta, começam a aparecer as primeiras rachaduras.',
+            cost: 'Primeira visita na obra que você não vai conseguir cobrar.' },
+    good: { lvl: 'ok', label: 'Tudo bem', health: 97,
+            txt: 'A capa continua macia e inteira, mesmo nos lugares que mais sofrem. Ela foi feita pra tomar esse sol todo.',
+            cost: 'Nenhuma ligação do cliente até agora.' },
   },
   7: {
     bad:  { lvl: 'bad', label: 'Falhando', health: 32,
-            txt: 'O cobre nu já oxidou nas crimpagens. A resistência de contato subiu, o conector aquece e o inversor passa a acusar falha de isolação em dias de chuva.',
-            cost: 'Troca de trechos + mão de obra + cliente insatisfeito.' },
-    good: { lvl: 'ok', label: 'Em ordem', health: 93,
-            txt: 'A estanhagem preservou o contato nas crimpagens. A string segue entregando a corrente de projeto, sem ponto quente e sem alarme de isolação.',
-            cost: 'Nenhum chamado aberto.' },
+            txt: 'O cobre já escureceu dentro dos conectores. Aquele ponto esquenta e, em dia de chuva, o inversor começa a desligar sozinho.',
+            cost: 'Trocar pedaços do cabo + mão de obra + cliente bravo.' },
+    good: { lvl: 'ok', label: 'Tudo bem', health: 93,
+            txt: 'O banho de estanho segurou o cobre firme dentro dos conectores. Nada esquenta, nada desliga, e as placas continuam entregando o que devem.',
+            cost: 'Nenhuma ligação do cliente até agora.' },
   },
   15: {
-    bad:  { lvl: 'bad', label: 'Comprometido', health: 12,
-            txt: 'Capa trincada com condutor exposto em vários trechos. Risco real de arco elétrico e de fuga à estrutura — o sistema precisa ser recabeado antes da metade da vida dos módulos.',
-            cost: 'Recabeamento completo: o custo do cabo, de novo, com obra em cima.' },
-    good: { lvl: 'ok', label: 'Em operação', health: 88,
-            txt: 'O cabo acompanha o ciclo dos módulos. A usina que você entregou continua gerando como no primeiro ano — e o seu nome continua associado a isso.',
+    bad:  { lvl: 'bad', label: 'Precisa trocar tudo', health: 12,
+            txt: 'Capa rachada e fio aparecendo em vários pontos. É risco de choque e de fogo. Vai ter que trocar o cabo inteiro antes das placas chegarem na metade da vida.',
+            cost: 'Comprar o cabo de novo — agora com obra em cima.' },
+    good: { lvl: 'ok', label: 'Ainda trabalhando', health: 88,
+            txt: 'O cabo acompanhou a vida das placas. A usina que você entregou continua gerando como no primeiro ano — e seu nome continua colado nisso.',
             cost: 'Custo total: o do cabo. Uma vez só.' },
   },
 };
+
 
 (function comparador() {
   const track = $('.timeline__track');
@@ -401,14 +403,14 @@ let calcState = null;
 
     // escolhe a menor bitola que atende ampacidade e meta de queda
     let pick = linhas.find(l => l.ampOk && l.queda <= CALC.metaQueda);
-    let motivo = 'Menor bitola que mantém a queda de tensão abaixo de 1% e atende a corrente da string.';
+    let motivo = 'É o cabo mais fino que dá conta da sua obra sem desperdiçar energia.';
     if (!pick) {
       pick = linhas.find(l => l.ampOk && l.queda <= CALC.limiteQueda);
-      motivo = 'Nenhuma bitola da linha fica abaixo de 1% nessa distância. Esta é a melhor opção — vale avaliar aproximar o inversor ou dividir o trecho.';
+      motivo = 'Nessa distância nenhum cabo fica perfeito. Esse é o melhor. Se der, tente deixar o inversor mais perto.';
     }
     if (!pick) {
       pick = linhas[linhas.length - 1];
-      motivo = 'A distância é longa demais para o lado CC nessa configuração. Fale com o time técnico: pode valer repensar o ponto do inversor.';
+      motivo = 'A distância é grande demais desse jeito. Fala com a gente: talvez valha mudar o inversor de lugar.';
     }
 
     const metros = Math.ceil((dist * 2 * strings * CALC.folga) / 10) * 10;
@@ -445,9 +447,9 @@ let calcState = null;
     const w = Math.min((r.pick.queda / CALC.limiteQueda) * 100, 100);
     meter.style.width = `${w}%`;
     meter.classList.remove('is-warn', 'is-bad');
-    let hint = 'Dentro da meta de projeto (≤ 1%)';
-    if (r.pick.queda > CALC.metaQueda)  { meter.classList.add('is-warn'); hint = 'Acima da meta de 1% — aceitável, mas vale revisar o traçado'; }
-    if (r.pick.queda > CALC.limiteQueda){ meter.classList.remove('is-warn'); meter.classList.add('is-bad'); hint = 'Acima de 3% — reveja o projeto antes de comprar'; }
+    let hint = 'Tudo certo: perde bem pouco';
+    if (r.pick.queda > CALC.metaQueda)  { meter.classList.add('is-warn'); hint = 'Dá pra usar, mas vale tentar encurtar o caminho'; }
+    if (r.pick.queda > CALC.limiteQueda){ meter.classList.remove('is-warn'); meter.classList.add('is-bad'); hint = 'Perde demais. Revise a obra antes de comprar'; }
     $('#resDropHint').textContent = hint;
 
     // metragem
@@ -459,18 +461,18 @@ let calcState = null;
       box.hidden = false;
       $('#resLoss').textContent = `~ ${nf(Math.round(r.perdaKwh))} kWh/ano`;
       $('#resLossMoney').textContent =
-        `cerca de R$ ${nf(Math.round(r.perdaRs))}/ano a mais em perda joule se você usar ${r.menor.secao} mm² em vez de ${r.pick.secao} mm²`;
-      $('#resLossBox .metric__k').textContent = `Se você descer para ${r.menor.secao} mm²`;
+        `uns R$ ${nf(Math.round(r.perdaRs))} por ano indo embora se usar ${r.menor.secao} mm² no lugar do ${r.pick.secao} mm²`;
+      $('#resLossBox .metric__k').textContent = `Se usar o de ${r.menor.secao} mm²`;
     } else {
       box.hidden = true;
     }
 
     // tabela
     $('#resTable').innerHTML = r.linhas.map(l => {
-      let tag = '<span class="tag tag--ok">Ideal</span>';
-      if (!l.ampOk)                        tag = '<span class="tag tag--no">Corrente baixa</span>';
-      else if (l.queda > CALC.limiteQueda) tag = '<span class="tag tag--no">Queda alta</span>';
-      else if (l.queda > CALC.metaQueda)   tag = '<span class="tag tag--mid">Aceitável</span>';
+      let tag = '<span class="tag tag--ok">Pode usar</span>';
+      if (!l.ampOk)                        tag = '<span class="tag tag--no">Fino demais</span>';
+      else if (l.queda > CALC.limiteQueda) tag = '<span class="tag tag--no">Perde muito</span>';
+      else if (l.queda > CALC.metaQueda)   tag = '<span class="tag tag--mid">Dá pra usar</span>';
       // .tag é renderizado como texto com marcador (ver styles.css), não como cápsula
       return `<tr class="${l.secao === r.pick.secao ? 'is-pick' : ''}">
         <td>${l.secao} mm²</td>
@@ -491,12 +493,12 @@ let calcState = null;
     if (!calcState) return;
     const r = calcState;
     const txt =
-`Simulei na calculadora do site:
-• Sistema: ${r.pot} kWp, ${r.strings} string(s)
-• Distância até o inversor: ${r.dist} m
-• String: ~${r.tensao} V / ${r.corr} A
-• Bitola recomendada: ${r.pick.secao} mm² (queda de ${nf(r.pick.queda, 2).replace('.', ',')}%)
-• Cabo estimado: ${nf(r.metros)} m`;
+`Usei a calculadora do site:
+• Sistema de ${r.pot} kWp, com ${r.strings} fileira(s) de placas
+• O inversor fica a ${r.dist} m das placas
+• Placas: ~${r.tensao} V / ${r.corr} A
+• Cabo indicado: ${r.pick.secao} mm² (perde ${nf(r.pick.queda, 2).replace('.', ',')}%)
+• Metros estimados: ${nf(r.metros)} m`;
     const msg = $('#wMsg');
     if (msg) { msg.value = txt; }
     // pré-marca a bitola no passo 2
@@ -525,19 +527,19 @@ let calcState = null;
           <p class="prod__badge">${d.badge}</p>
           <p class="prod__use">${d.uso}</p>
           <ul class="prod__specs">
-            <li><b>Seção nominal</b><span>${g} mm²</span></li>
-            <li><b>Tensão nominal</b><span>1500 V CC</span></li>
-            <li><b>Corrente máx. (ref.)</b><span>${d.amp} A</span></li>
-            <li><b>Ø externo aprox.</b><span>${d.diam}</span></li>
-            <li><b>Peso aprox.</b><span>${d.peso}</span></li>
-            <li><b>Condutor</b><span>Cobre estanhado</span></li>
+            <li><b>Grossura</b><span>${g} mm²</span></li>
+            <li><b>Feito para</b><span>1500 V</span></li>
+            <li><b>Aguenta até</b><span>${d.amp} A</span></li>
+            <li><b>Grossura por fora</b><span>${d.diam}</span></li>
+            <li><b>Peso</b><span>${d.peso}</span></li>
+            <li><b>Por dentro</b><span>Cobre com estanho</span></li>
           </ul>
         </div>
         <div class="prod__viz">
-          <p class="prod__vizTitle">Proporção real entre as bitolas</p>
+          <p class="prod__vizTitle">Tamanho de um comparado ao outro</p>
           <div class="prod__scale">
             ${[4, 6, 10, 16].map(s => `
-              <button class="prod__dot ${s == g ? 'is-on' : ''}" data-jump="${s}" aria-label="Ver cabo de ${s} mm²">
+              <button class="prod__dot ${s == g ? 'is-on' : ''}" data-jump="${s}" aria-label="Ver o cabo de ${s} mm²">
                 <span class="prod__circle" style="--sz:${GAUGES[s].viz * 0.52}px"><span class="prod__circleIn"></span></span>
                 <em>${s}</em>
               </button>`).join('')}
@@ -545,8 +547,9 @@ let calcState = null;
           <div class="prod__colors">
             <span class="prod__color"><i class="prod__swatch" style="background:#12161D"></i> Preto</span>
             <span class="prod__color"><i class="prod__swatch" style="background:#C0342B"></i> Vermelho</span>
+            <span class="prod__color"><i class="prod__swatch" style="background:#2E9E4A"></i> Verde</span>
           </div>
-          <p class="prod__vizNote">Valores de referência — confirme na ficha técnica do produto.</p>
+          <p class="prod__vizNote">Números de referência. Peça a ficha técnica pra confirmar.</p>
         </div>
       </div>`;
   };
@@ -573,33 +576,34 @@ let calcState = null;
    ========================================================= */
 const WHO = {
   integrador: {
-    h: 'Você entrega a obra. Você atende a garantia.',
-    lead: 'O cabo que você passa hoje volta como chamado daqui a três anos — ou não volta nunca. A diferença está em quem fabricou.',
+    h: 'Quem entrega a obra é você. Quem volta nela também.',
+    lead: 'O cabo que você passa hoje pode virar uma ligação chata daqui a três anos — ou nunca mais dar notícia. Isso depende de quem fabricou.',
     pts: [
-      ['Metragem que fecha', 'Marcação metro a metro na capa: você confere o rolo antes de subir no telhado e controla o consumo por obra.'],
-      ['Menos retorno de garantia', 'Composto termofixo resistente a UV e condutor estanhado — feito para durar o ciclo dos módulos, não o da nota fiscal.'],
-      ['Apoio no dimensionamento', 'Manda a distância e a string; a gente confere a bitola com você antes de fechar o pedido.'],
+      ['A metragem fecha', 'O número do metro vem escrito no cabo. Você confere o rolo antes de subir no telhado e sabe quanto gastou em cada obra.'],
+      ['Menos obra de graça', 'Capa que aguenta sol e cobre com banho de estanho. Feito pra durar o tempo das placas, não o tempo da nota fiscal.'],
+      ['A gente ajuda a escolher', 'Manda a distância e quantas placas. A gente confere a grossura junto com você antes de fechar o pedido.'],
     ],
   },
   engenharia: {
-    h: 'Especificação que sobrevive à compra.',
-    lead: 'De nada adianta o memorial pedir cabo solar certificado se o que chega na obra é outra coisa. Comprando de fábrica, a rastreabilidade não se perde no caminho.',
+    h: 'O que você escreve no projeto é o que precisa chegar na obra.',
+    lead: 'Não adianta o projeto pedir cabo bom se o que compram é outra coisa. Comprando direto da fábrica, dá pra saber exatamente o que foi feito.',
     pts: [
-      ['Processos conforme ISO 9001', 'Controle estruturado em todas as etapas, do recebimento do cobre à expedição do rolo.'],
-      ['Linha completa', '4, 6, 10 e 16 mm² — do ramal de string ao tronco de usina, com a mesma régua de qualidade.'],
-      ['Interlocução técnica direta', 'Dúvida de aplicação fala com quem fabrica, sem passar por três camadas de revenda.'],
+      ['Cabo com laudo', 'Nossos cabos são testados e têm laudo. Isso é o que evita susto na hora da vistoria da concessionária.'],
+      ['Linha completa', 'De 4 a 16 mm², mais os conectores MC4. Da fileira de placas até a usina inteira, tudo do mesmo lugar.'],
+      ['Fala direto com a fábrica', 'Dúvida técnica você tira com quem faz o cabo, sem passar por três balcões antes.'],
     ],
   },
   distribuidor: {
-    h: 'Giro alto, ruído baixo.',
-    lead: 'Cabo solar é item de recompra. O que trava o giro não é o preço — é o cabo que gera reclamação e some da sua prateleira por má fama.',
+    h: 'Cabo é item de recompra. Se der problema, some da prateleira.',
+    lead: 'O que trava a venda não é o preço — é o cabo que gera reclamação e queima o nome da sua loja.',
     pts: [
-      ['Fabricante nacional', 'Sem janela de importação, sem câmbio no meio do caminho, sem esperar contêiner para repor estoque.'],
-      ['Linha que cobre o balcão', 'As quatro bitolas mais pedidas, em preto e vermelho, atendendo do residencial ao industrial.'],
-      ['Condição para recorrência', 'Quem compra todo mês compra diferente de quem compra uma vez. Fale com o comercial sobre volume.'],
+      ['Fábrica aqui no Brasil', 'Sem esperar navio, sem dólar no meio do caminho. Precisou repor, a gente produz.'],
+      ['Seu nome no cabo', 'A gente grava a marca da sua loja direto na bobina. Margem melhor e sua marca aparecendo em toda obra.'],
+      ['Preço de quem compra sempre', 'Quem compra todo mês compra diferente de quem compra uma vez. Fale com a gente sobre volume.'],
     ],
   },
 };
+
 
 (function paraQuem() {
   const panel = $('#whoPanel');
@@ -612,7 +616,7 @@ const WHO = {
         <div>
           <h3>${d.h}</h3>
           <p class="who__lead">${d.lead}</p>
-          <div class="who__cta"><a class="btn btn--primary" href="#orcamento">Falar com o comercial</a></div>
+          <div class="who__cta"><a class="btn btn--primary" href="#orcamento">Pedir um preço</a></div>
         </div>
         <ul class="who__points">
           ${d.pts.map(([b, p]) => `<li>
@@ -661,7 +665,7 @@ const WHO = {
   const btnBack = $('#wizBack'), btnNext = $('#wizNext'), btnSend = $('#wizSend');
   const alt = $('#wizAlt'), done = $('#wizDone');
 
-  const titles = ['Quem é você', 'O que você precisa', 'Seus dados'];
+  const titles = ['O que você faz', 'Do que você precisa', 'Seus dados'];
   const data = { perfil: '', bitolas: [], prazo: '' };
   let step = 1;
 
@@ -738,11 +742,11 @@ const WHO = {
   const montaMensagem = () => {
     const g = (id) => $(id).value.trim();
     const linhas = [
-      `*Orçamento de cabo solar — site ${CONFIG.empresa}*`,
+      `*Pedido de preço — site ${CONFIG.empresa}*`,
       '',
-      `*Perfil:* ${data.perfil}`,
-      `*Bitolas:* ${data.bitolas.join(', ')}`,
-      g('#wMetros') ? `*Metragem:* ${g('#wMetros')}` : null,
+      `*O que faz:* ${data.perfil}`,
+      `*Quer:* ${data.bitolas.join(', ')}`,
+      g('#wMetros') ? `*Metros:* ${g('#wMetros')}` : null,
       `*Prazo:* ${data.prazo}`,
       '',
       `*Nome:* ${g('#wNome')}`,
@@ -750,7 +754,7 @@ const WHO = {
       `*WhatsApp:* ${g('#wFone')}`,
       g('#wEmail')  ? `*E-mail:* ${g('#wEmail')}`   : null,
       g('#wCidade') ? `*Cidade:* ${g('#wCidade')}`  : null,
-      g('#wMsg')    ? `\n*Projeto:*\n${g('#wMsg')}` : null,
+      g('#wMsg')    ? `\n*Sobre a obra:*\n${g('#wMsg')}` : null,
     ].filter(Boolean);
     return linhas.join('\n');
   };
@@ -758,7 +762,7 @@ const WHO = {
   const enviar = (canal) => {
     const msg = montaMensagem();
     if (canal === 'email') {
-      const assunto = `Orçamento de cabo solar — ${$('#wNome').value.trim()}`;
+      const assunto = `Pedido de preço de cabo solar — ${$('#wNome').value.trim()}`;
       window.location.href =
         `mailto:${CONFIG.email}?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(msg.replace(/\*/g, ''))}`;
       return;
