@@ -471,6 +471,7 @@ let calcState = null;
       if (!l.ampOk)                        tag = '<span class="tag tag--no">Corrente baixa</span>';
       else if (l.queda > CALC.limiteQueda) tag = '<span class="tag tag--no">Queda alta</span>';
       else if (l.queda > CALC.metaQueda)   tag = '<span class="tag tag--mid">Aceitável</span>';
+      // .tag é renderizado como texto com marcador (ver styles.css), não como cápsula
       return `<tr class="${l.secao === r.pick.secao ? 'is-pick' : ''}">
         <td>${l.secao} mm²</td>
         <td>${nf(l.queda, 2).replace('.', ',')}%</td>
@@ -520,10 +521,8 @@ let calcState = null;
     panel.innerHTML = `
       <div class="prod__grid ana-fade">
         <div>
-          <div class="prod__title">
-            <h3>Cabo solar ${g} mm²</h3>
-            <span class="prod__badge">${d.badge}</span>
-          </div>
+          <h3 class="prod__h">Cabo solar ${g} mm²</h3>
+          <p class="prod__badge">${d.badge}</p>
           <p class="prod__use">${d.uso}</p>
           <ul class="prod__specs">
             <li><b>Seção nominal</b><span>${g} mm²</span></li>
@@ -796,3 +795,18 @@ $$('#faq-list .faq__item').forEach(item => {
     $$('#faq-list .faq__item').forEach(o => { if (o !== item) o.open = false; });
   });
 });
+
+/* =========================================================
+   13. SLOTS DE IMAGEM
+   Se a foto ainda não foi colocada em assets/img/, o <img>
+   é removido e a arte vetorial de base assume o lugar.
+   ========================================================= */
+(function shots() {
+  const ok = (img) => img.closest('.shot')?.classList.add('com-foto');
+  const falhou = (img) => { img.remove(); };
+  $$('.shot img').forEach(img => {
+    img.addEventListener('load',  () => { if (img.naturalWidth > 0) ok(img); }, { once: true });
+    img.addEventListener('error', () => falhou(img), { once: true });
+    if (img.complete) { img.naturalWidth > 0 ? ok(img) : falhou(img); }
+  });
+})();

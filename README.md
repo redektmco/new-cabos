@@ -56,7 +56,30 @@ Os números de ampacidade/diâmetro/peso ficam todos no objeto `GAUGES` no topo
 de `assets/js/app.js`. Um único lugar alimenta o hero, as abas de produto e a
 calculadora.
 
-### 3. Depoimentos
+### 3. Imagens (slots já prontos)
+
+A página tem **dois slots de imagem** esperando as fotos reais. Enquanto o
+arquivo não existe, aparece uma arte vetorial de base; assim que o arquivo é
+colocado na pasta, a foto assume sozinha. **Não é preciso tocar em código** —
+só salvar o arquivo com o nome certo:
+
+| Arquivo | Onde aparece | Proporção ideal |
+|---|---|---|
+| `assets/img/fabrica.jpg` | seção "A fábrica" | ~1200×420 (larga) |
+| `assets/img/obra.jpg` | seção "Escolha o seu cenário" | ~1200×300 (faixa) |
+
+As legendas ficam no `index.html`, dentro de cada `<figcaption>`. Para
+trocar `.jpg` por `.webp` ou `.png`, ajuste o `src` do `<img>` no slot.
+
+Para adicionar um slot novo em qualquer seção, copie um bloco `<figure class="shot">`
+existente e troque o `src`, o `alt` e a legenda.
+
+> **Por que não usei as imagens do site original:** a política de rede deste
+> ambiente bloqueia `newcabos.com.br` e `lp.newcabos.com.br` (403 no CONNECT),
+> junto com qualquer outra fonte externa de imagem. Não consegui baixar nada.
+> Basta enviar os arquivos ou liberar o domínio na policy do ambiente.
+
+### 4. Depoimentos
 
 Não inventei depoimentos de clientes. O bloco pronto está **comentado** no
 `index.html`, logo acima da seção de orçamento — é só colar 3 falas reais (com
@@ -70,6 +93,11 @@ nome, empresa, cidade e autorização) e descomentar.
 solar — o integrador que volta na obra de graça — em vez de falar de si mesma.
 O cabo deixou de ser descrito como produto e passou a ser descrito como risco:
 2% do orçamento, 100% do retrabalho.
+
+**Visual.** A página não usa nenhuma "pill" (aquelas cápsulas arredondadas com
+fundo e borda). Os rótulos de seção viraram texto com filete, os status viraram
+texto com marcador, e todo controle — botões, abas, seletores — usa canto
+arredondado de 10–12px em vez de raio total.
 
 **Elementos interativos** (todos em JS puro, sem biblioteca):
 

@@ -48,7 +48,7 @@ main section[id]{scroll-margin-top:92px}
    BOTÕES
    ========================================================= */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:.6em;
-  padding:15px 26px;border-radius:999px;border:1.5px solid transparent;
+  padding:15px 26px;border-radius:12px;border:1.5px solid transparent;
   font-weight:700;font-size:.97rem;letter-spacing:-.01em;cursor:pointer;
   transition:transform .2s var(--ease),box-shadow .25s var(--ease),background .2s,border-color .2s,color .2s;
   text-align:center;line-height:1.2}
@@ -127,11 +127,12 @@ main section[id]{scroll-margin-top:92px}
 .hero__copy,.hero__visual{min-width:0}
 .hero__in{position:relative;display:grid;grid-template-columns:1.08fr .92fr;gap:clamp(30px,4vw,64px);align-items:center}
 
-.eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:.78rem;font-weight:700;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--amber);margin:0 0 20px;padding:8px 15px;border-radius:999px;
-  background:rgba(255,176,32,.09);border:1px solid rgba(255,176,32,.22)}
-.eyebrow__dot{width:6px;height:6px;border-radius:50%;background:var(--amber);flex:none}
-.eyebrow--dark{color:#B4671A;background:rgba(224,148,86,.12);border-color:rgba(224,148,86,.3)}
+.kicker{display:flex;align-items:center;gap:14px;font-size:.76rem;font-weight:700;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--amber);margin:0 0 20px}
+.kicker::before{content:'';width:34px;height:2px;background:var(--amber);flex:none;border-radius:2px}
+.sec--light .kicker{color:#B4671A}
+.sec--light .kicker::before{background:#B4671A}
+.kicker--hero{margin-bottom:26px}
 
 h1 .hl{position:relative;color:var(--amber);white-space:nowrap}
 h1 .hl::after{content:'';position:absolute;left:0;right:0;bottom:.06em;height:.16em;background:rgba(255,176,32,.2);border-radius:3px;z-index:-1}
@@ -151,9 +152,7 @@ h1 .hl::after{content:'';position:absolute;left:0;right:0;bottom:.06em;height:.1
 .cable-card::before{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
   background:linear-gradient(140deg,rgba(255,176,32,.13),transparent 46%)}
 .cable-card__head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px;position:relative}
-.chip{display:inline-flex;align-items:center;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
-  padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--mut)}
-.chip--live{color:var(--good)}
+.cable-card__title{font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
 .cable-card__spec{font-family:var(--fh);font-weight:700;color:var(--amber);font-size:.95rem}
 
 .cable-3d{position:relative;height:150px;display:flex;align-items:center;justify-content:center;margin-bottom:22px}
@@ -183,7 +182,7 @@ h1 .hl::after{content:'';position:absolute;left:0;right:0;bottom:.06em;height:.1
 @keyframes flow{from{left:-70px}to{left:100%}}
 
 .cable-card__switch{display:flex;gap:8px;margin-bottom:20px;position:relative;flex-wrap:wrap}
-.pill{flex:1;min-width:64px;padding:10px 8px;border-radius:12px;border:1px solid var(--line);
+.pill{flex:1;min-width:64px;padding:11px 8px;border-radius:10px;border:1px solid var(--line);
   background:rgba(255,255,255,.03);color:var(--mut);font-size:.84rem;font-weight:600;transition:.22s var(--ease)}
 .pill:hover{border-color:var(--line-2);color:var(--txt)}
 .pill.is-active{background:linear-gradient(135deg,rgba(255,176,32,.2),rgba(255,138,30,.1));
@@ -257,7 +256,7 @@ h1 .hl::after{content:'';position:absolute;left:0;right:0;bottom:.06em;height:.1
 .anatomy__hint svg{width:17px;height:17px}
 
 .ana-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
-.ana-tab{padding:10px 17px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);
+.ana-tab{padding:10px 17px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.03);
   color:var(--mut);font-size:.87rem;font-weight:600;transition:.22s var(--ease)}
 .ana-tab:hover{color:var(--txt);border-color:var(--line-2)}
 .ana-tab.is-active{background:rgba(255,176,32,.14);border-color:var(--amber);color:var(--amber)}
@@ -302,16 +301,17 @@ h1 .hl::after{content:'';position:absolute;left:0;right:0;bottom:.06em;height:.1
 .vs--bad{background:#FDF4F2;border-color:#F0DBD5}
 .vs--good{background:var(--ink-soft);border-color:rgba(255,176,32,.28);color:var(--txt)}
 .vs header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
-.vs__tag{font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:7px 14px;border-radius:999px}
-.vs__tag--bad{background:rgba(220,80,60,.12);color:#B03A24;border:1px solid rgba(220,80,60,.25)}
-.vs__tag--good{background:rgba(255,176,32,.16);color:var(--amber);border:1px solid rgba(255,176,32,.35)}
-.vs__status{font-family:var(--fh);font-weight:700;font-size:.9rem;padding:5px 13px;border-radius:99px;
-  transition:background .4s,color .4s}
-.vs__status[data-lvl="ok"]{background:rgba(52,211,153,.16);color:#0E9F6E}
+.vs__name{font-family:var(--fh);font-size:1.16rem;font-weight:700;letter-spacing:-.01em;margin:0}
+.vs--bad .vs__name{color:#8C3B25}
+.vs--good .vs__name{color:var(--amber)}
+.vs__status{display:inline-flex;align-items:center;gap:8px;font-family:var(--fh);font-weight:700;
+  font-size:.88rem;transition:color .4s}
+.vs__status::before{content:'';width:8px;height:8px;border-radius:50%;background:currentColor;flex:none}
+.vs__status[data-lvl="ok"]{color:#0E9F6E}
 .vs--good .vs__status[data-lvl="ok"]{color:var(--good)}
-.vs__status[data-lvl="warn"]{background:rgba(251,191,36,.18);color:#B45309}
+.vs__status[data-lvl="warn"]{color:#B45309}
 .vs--good .vs__status[data-lvl="warn"]{color:var(--warn)}
-.vs__status[data-lvl="bad"]{background:rgba(248,113,113,.18);color:#B91C1C}
+.vs__status[data-lvl="bad"]{color:#B91C1C}
 .vs--good .vs__status[data-lvl="bad"]{color:var(--bad)}
 .vs__health{height:8px;border-radius:99px;background:rgba(12,18,32,.1);overflow:hidden;margin-bottom:20px}
 .vs--good .vs__health{background:rgba(255,255,255,.08)}
@@ -412,31 +412,31 @@ textarea{resize:vertical;min-height:84px}
 .calc__table td{padding:11px 8px;word-break:break-word;border-bottom:1px solid rgba(255,255,255,.05);color:var(--mut)}
 .calc__table tr.is-pick td{background:rgba(255,176,32,.08);color:var(--txt)}
 .calc__table tr.is-pick td:first-child{font-weight:700;color:var(--amber);border-left:2px solid var(--amber)}
-.calc__table .tag{display:inline-block;font-size:.7rem;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.calc__table .tag{display:inline-flex;align-items:center;gap:7px;font-size:.78rem;font-weight:700;white-space:nowrap}
+.calc__table .tag::before{content:'';width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
 .calc__table th:nth-child(1),.calc__table td:nth-child(1){width:22%}
 .calc__table th:nth-child(2),.calc__table td:nth-child(2){width:19%}
 .calc__table th:nth-child(3),.calc__table td:nth-child(3){width:26%}
 .calc__table th:nth-child(4),.calc__table td:nth-child(4){width:33%}
-.tag--ok{background:rgba(52,211,153,.14);color:var(--good)}
-.tag--mid{background:rgba(251,191,36,.14);color:var(--warn)}
-.tag--no{background:rgba(248,113,113,.14);color:var(--bad)}
+.tag--ok{color:var(--good)}
+.tag--mid{color:var(--warn)}
+.tag--no{color:var(--bad)}
 .calc__ctaNote{text-align:center;font-size:.79rem;color:#64748B;margin:12px 0 0}
 
 /* =========================================================
    PRODUTOS
    ========================================================= */
 .prod__tabs{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:24px}
-.prod__tab{padding:12px 24px;border-radius:999px;border:1px solid var(--l-line);background:#fff;
+.prod__tab{padding:12px 24px;border-radius:10px;border:1px solid var(--l-line);background:#fff;
   color:var(--l-mut);font-weight:700;font-size:.93rem;transition:.22s var(--ease)}
 .prod__tab:hover{border-color:#B9C7DC;color:var(--l-txt)}
 .prod__tab.is-active{background:var(--l-txt);border-color:var(--l-txt);color:#fff}
 .prod__panel{background:#fff;border:1px solid var(--l-line);border-radius:var(--r-lg);
   padding:clamp(26px,3.4vw,42px);box-shadow:0 22px 50px -34px rgba(12,18,32,.32)}
 .prod__grid{display:grid;grid-template-columns:1.1fr 1fr;gap:clamp(24px,3.5vw,48px);align-items:center}
-.prod__title{display:flex;align-items:baseline;gap:12px;margin-bottom:8px}
-.prod__title h3{font-size:clamp(1.6rem,3vw,2.15rem)}
-.prod__badge{font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
-  background:rgba(224,148,86,.14);color:#A85E21;padding:5px 11px;border-radius:99px}
+.prod__h{font-size:clamp(1.6rem,3vw,2.15rem);margin-bottom:6px}
+.prod__badge{font-size:.74rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:#A85E21;margin:0 0 14px}
 .prod__use{color:var(--l-mut);font-size:1rem;margin-bottom:22px}
 .prod__specs{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(2,1fr);gap:1px;
   background:var(--l-line);border:1px solid var(--l-line);border-radius:var(--r);overflow:hidden}
@@ -503,7 +503,7 @@ textarea{resize:vertical;min-height:84px}
    PARA QUEM
    ========================================================= */
 .who__tabs{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:24px}
-.who__tab{padding:13px 26px;border-radius:999px;border:1px solid var(--l-line);background:#fff;
+.who__tab{padding:13px 26px;border-radius:10px;border:1px solid var(--l-line);background:#fff;
   color:var(--l-mut);font-weight:700;font-size:.93rem;transition:.22s var(--ease)}
 .who__tab:hover{border-color:#B9C7DC;color:var(--l-txt)}
 .who__tab.is-active{background:linear-gradient(135deg,var(--amber),var(--amber-2));border-color:transparent;color:#241500;
@@ -587,7 +587,7 @@ textarea{resize:vertical;min-height:84px}
 .choice.is-on b{color:var(--amber)}
 
 .chips{display:flex;flex-wrap:wrap;gap:9px}
-.chip-btn{padding:10px 18px;border-radius:999px;border:1.5px solid var(--line);background:rgba(255,255,255,.03);
+.chip-btn{padding:11px 18px;border-radius:10px;border:1.5px solid var(--line);background:rgba(255,255,255,.03);
   color:var(--mut);font-size:.88rem;font-weight:600;transition:.22s var(--ease)}
 .chip-btn:hover{border-color:var(--line-2);color:var(--txt)}
 .chip-btn.is-on{border-color:var(--amber);background:rgba(255,176,32,.13);color:var(--amber)}
@@ -629,7 +629,7 @@ textarea{resize:vertical;min-height:84px}
 .footer__bottom p{margin:0}
 
 .fab{position:fixed;right:20px;bottom:20px;z-index:90;display:inline-flex;align-items:center;gap:10px;
-  background:var(--wa);color:#04361A;padding:14px 20px;border-radius:999px;font-weight:700;font-size:.92rem;
+  background:var(--wa);color:#04361A;padding:14px 20px;border-radius:14px;font-weight:700;font-size:.92rem;
   box-shadow:0 14px 34px -10px rgba(37,211,102,.62);transform:translateY(120px);opacity:0;
   transition:transform .45s var(--ease),opacity .35s,background .2s}
 .fab.is-in{transform:none;opacity:1}
@@ -691,4 +691,34 @@ textarea{resize:vertical;min-height:84px}
   
   .wiz__nav{flex-direction:column-reverse}
   .footer__bottom{flex-direction:column;gap:8px}
+}
+
+/* =========================================================
+   SLOTS DE IMAGEM
+   ---------------------------------------------------------
+   Cada .shot tem uma arte vetorial de base (.shot__art) e um
+   <img> por cima. Se o arquivo da foto não existir, o JS
+   remove o <img> e a arte aparece no lugar — nada quebra.
+   Para usar a foto real: salve o arquivo com o nome indicado
+   no src e pronto, sem tocar em código.
+   ========================================================= */
+.shot{position:relative;margin:0 0 clamp(28px,3.4vw,44px);border-radius:var(--r-lg);
+  overflow:hidden;border:1px solid var(--line);background:var(--ink)}
+.sec--light .shot{border-color:var(--l-line)}
+.shot__art,.shot img{display:block;width:100%;height:100%;object-fit:cover}
+.shot__art{position:absolute;inset:0}
+.shot__art svg{width:100%;height:100%;display:block}
+.shot img{position:relative;z-index:1;opacity:0;transition:opacity .4s var(--ease)}
+.shot.com-foto img{opacity:1}
+.shot--wide{aspect-ratio:1200/420}
+.shot--panel{aspect-ratio:1200/300}
+.shot figcaption{position:absolute;left:0;right:0;bottom:0;z-index:2;
+  padding:56px 26px 18px;font-size:.84rem;color:rgba(234,240,248,.9);
+  background:linear-gradient(transparent,rgba(5,8,14,.86));letter-spacing:-.005em}
+/* a arte é o padrão; só some quando a foto real carrega de fato */
+.shot.com-foto .shot__art{opacity:0}
+@media (max-width:680px){
+  .shot--wide{aspect-ratio:4/3}
+  .shot--panel{aspect-ratio:3/2}
+  .shot figcaption{font-size:.78rem;padding:28px 18px 15px}
 }
