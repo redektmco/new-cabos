@@ -36,8 +36,8 @@ e **azul `#1E7FE0` / `#10233D`** (o cabo em volta). Ficam em `:root`, no topo do
 - **Números técnicos** das bitolas (corrente, diâmetro, peso) continuam sendo
   referência de catálogo do setor, não a ficha técnica de vocês. Estão todos no
   objeto `GAUGES`, no topo de `assets/js/app.js`.
-- **Depoimentos**: não inventei nenhum. O bloco pronto está comentado no
-  `index.html`, acima da seção de orçamento. É colar 3 falas reais e descomentar.
+- **Depoimentos**: não inventei nenhum. Quando houver 3 falas reais, o melhor
+  lugar é o fim da dobra 2 (`#porque`), para não criar uma quinta dobra.
 
 ## O que mudou em relação à LP antiga
 
@@ -55,28 +55,22 @@ inevitável, ele vem explicado na frase seguinte.
 **Visual.** Nenhuma "pill" (cápsula arredondada). Rótulos de seção são texto com
 filete, status são texto com marcador, e os controles usam canto de 10–12px.
 
-**Elementos interativos** (todos em JS puro, sem biblioteca):
+**Estrutura em 4 dobras.**
 
-1. **Calculadora de bitola** — potência, distância, nº de strings, tensão e
-   corrente entram; saem bitola recomendada, queda de tensão, metragem
-   estimada e quanto de geração se perde por ano ao descer uma bitola.
-   É o principal gancho de geração de lead da página: o CTA leva os números
-   simulados direto para o formulário.
-2. **Anatomia do cabo** — corte transversal em SVG com hotspots clicáveis.
-   Cada camada explica o que faz e o que acontece quando o fabricante
-   economiza nela.
-3. **Linha do tempo comparativa** — cabo genérico × New Cabos nos anos 1, 3, 7
-   e 15, com barra de "saúde" e custo acumulado. Roda uma vez sozinha ao
-   entrar na tela e para assim que o usuário assume o controle.
-4. **Seletor de bitola no hero** — muda as proporções do corte do cabo e as
-   especificações ao vivo.
-5. **Abas de produto** com escala visual das quatro bitolas lado a lado.
-6. **Abas por perfil** — integrador, engenharia e distribuidor, cada um com o
-   seu argumento.
-7. **Formulário em 3 passos** com barra de progresso, validação por etapa e
-   máscara de telefone.
-8. Processo produtivo que acende conforme o scroll, FAQ acordeão, contadores
-   animados, barra de progresso de leitura, WhatsApp fixo e reveal no scroll.
+1. **Hero** — promessa (direto da fábrica), CTAs, corte do cabo com seletor de
+   grossura e contadores.
+2. **Por que a New Cabos** (`#porque`) — as 3 dores (sol, metragem, vistoria)
+   com a resposta do nosso cabo, e o bloco da fábrica (5.000 m², 24h, cores e MC4).
+3. **Calculadora** (`#calculadora`) — potência, distância, nº de fileiras,
+   tensão e corrente entram; saem grossura recomendada, energia perdida,
+   metragem e quanto se perde por ano ao descer uma grossura. O CTA leva os
+   números direto para o formulário.
+4. **Orçamento** (`#orcamento`) — formulário em 3 passos + WhatsApp direto.
+   Marca própria, frete e entrega nacional viraram argumentos do lado esquerdo.
+
+Anatomia do cabo, linha do tempo comparativa, abas de produto, abas por perfil,
+passo a passo da fábrica, bloco de marca própria e FAQ saíram para caber em 4
+dobras; o essencial de cada um foi incorporado nas dobras 2, 3 e 4.
 
 ---
 
@@ -113,7 +107,7 @@ o dimensionamento final é do projeto elétrico e da ART responsável.
 
 ## Acessibilidade e performance
 
-- Sem framework, sem jQuery: ~35 KB de CSS + JS somados, não minificados.
+- Sem framework, sem jQuery: ~25 KB de CSS + JS somados, não minificados.
 - Única requisição externa: Google Fonts (Inter + Sora).
 - Navegação por teclado, `aria-*` nas abas e no formulário, skip link,
   `prefers-reduced-motion` respeitado em todas as animações.
