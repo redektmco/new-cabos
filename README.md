@@ -21,9 +21,8 @@ Com o acesso liberado, baixei direto de `lp.newcabos.com.br` e `newcabos.com.br`
 | O que | De onde veio |
 |---|---|
 | `assets/img/logo-newcabos.png` · `icone-newcabos.png` · `favicon.png` | logo oficial do site institucional |
-| `assets/img/hero-cabo.webp` | imagem de topo da LP (recortada no produto) |
 | `assets/img/fabrica.jpg` | foto real da fábrica, da LP |
-| `assets/img/rolos.png` | foto dos rolos preto/vermelho/verde |
+| `assets/img/rolos.png` | foto dos rolos preto/vermelho/verde (fonte do `hero-rolos.webp`, recortada sem as faixas brancas) |
 | WhatsApp `(15) 99755-6534` e `contato@newcabos.com.br` | rodapé da LP |
 | 5.000 m², entrega em 24h, conectores MC4, marca própria | textos da LP |
 
