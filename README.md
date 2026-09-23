@@ -107,7 +107,7 @@ o dimensionamento final é do projeto elétrico e da ART responsável.
 
 ## Acessibilidade e performance
 
-- Sem framework, sem jQuery: ~25 KB de CSS + JS somados, não minificados.
+- Sem framework, sem jQuery: ~55 KB de CSS + JS somados, não minificados.
 - Única requisição externa: Google Fonts (Inter + Sora).
 - Navegação por teclado, `aria-*` nas abas e no formulário, skip link,
   `prefers-reduced-motion` respeitado em todas as animações.
