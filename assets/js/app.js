@@ -173,12 +173,154 @@ const GAUGES = {
 })();
 
 /* =========================================================
-   5. (calculadora removida — seção virou comparativo estático)
+   5. LINHA DO TEMPO · NEW CABOS x GENÉRICO
    ---------------------------------------------------------
-   Queda de tensão CC:  ΔV = 2 · ρ · L · I / S
-   ρ (cobre, temperatura de operação) = 0,0178 Ω·mm²/m
-   Estimativa de pré-venda. O projeto elétrico manda.
+   Comparativo ilustrativo. Cada passo muda o visual dos
+   dois cabos; o genérico ganha classes de desgaste.
    ========================================================= */
+(function linhaDoTempo() {
+  const tl = $('#tl');
+  if (!tl) return;
+
+  const PASSOS = [
+    { label: 'Dia 1',   dias: 0,    trocas: '0',
+      nc:  { st: 'Novo',           cls: 'is-ok',  bar: 100, txt: 'Metragem marcada de metro em metro e laudo.' },
+      gen: { st: 'Novo',           cls: 'is-ok',  bar: 100, txt: 'Parece igual. Mas sem marcação e sem laudo.', jk: '#1D2128' } },
+    { label: '1 ano',   dias: 365,  trocas: '0',
+      nc:  { st: 'Como novo',      cls: 'is-ok',  bar: 98,  txt: 'Capa dupla firme, aguenta sol de frente.' },
+      gen: { st: 'Ressecando',     cls: 'is-mid', bar: 75,  txt: 'O sol começa a ressecar a capa.', jk: '#3A3530' } },
+    { label: '3 anos',  dias: 1095, trocas: '0',
+      nc:  { st: 'Sem rachaduras', cls: 'is-ok',  bar: 96,  txt: 'Conector limpo, sem oxidação.' },
+      gen: { st: 'Rachando',       cls: 'is-bad', bar: 40,  txt: 'A capa racha. Risco de curto e de o inversor desligar.', jk: '#5E5347' } },
+    { label: '10 anos', dias: 3650, trocas: '1',
+      nc:  { st: 'Funcionando',    cls: 'is-ok',  bar: 92,  txt: 'Capa e cobre estanhado em boas condições.' },
+      gen: { st: 'Hora de trocar', cls: 'is-bad', bar: 12,  txt: 'Cobre exposto. Equipe de volta ao telhado.', jk: '#7D6E5D' } },
+    { label: '25 anos', dias: 9125, trocas: '2+',
+      nc:  { st: 'Funcionando',    cls: 'is-ok',  bar: 88,  txt: 'Feito pra durar a vida útil do sistema.' },
+      gen: { st: 'Trocado de novo', cls: 'is-bad', bar: 20, txt: 'Já foi trocado uma ou mais vezes.', jk: '#8A7965' } },
+  ];
+  const ULTIMO = PASSOS.length - 1;
+
+  const nc = $('.tl__card--nc', tl), gen = $('.tl__card--gen', tl);
+  const stops = $$('.tl__stop', tl);
+  const yearEl = $('#tlYear'), daysEl = $('#tlDays'), tripsEl = $('#tlTrips');
+  const fill = $('#tlFill'), track = $('#tlTrack'), stage = $('#tlStage'), playBtn = $('#tlPlay');
+
+  let atual = -1, diasMostrados = 0, timer = null, rafDias = null;
+
+  const pinta = (card, d) => {
+    const st = $('[data-status]', card);
+    st.textContent = d.st;
+    st.className = `tl__status ${d.cls}`;
+    $('[data-bar]', card).style.width = `${d.bar}%`;
+    $('[data-bar]', card).className = d.cls;
+    $('[data-txt]', card).textContent = d.txt;
+  };
+
+  const contaDias = (alvo) => {
+    cancelAnimationFrame(rafDias);
+    if (reduceMotion) { diasMostrados = alvo; daysEl.textContent = nf(alvo); return; }
+    const de = diasMostrados, t0 = performance.now(), dur = 650;
+    const passo = (t) => {
+      const k = Math.min((t - t0) / dur, 1);
+      diasMostrados = Math.round(de + (alvo - de) * (1 - Math.pow(1 - k, 3)));
+      daysEl.textContent = nf(diasMostrados);
+      if (k < 1) rafDias = requestAnimationFrame(passo);
+    };
+    rafDias = requestAnimationFrame(passo);
+  };
+
+  const vaiPara = (i) => {
+    i = Math.max(0, Math.min(ULTIMO, i));
+    if (i === atual) return;
+    atual = i;
+    const p = PASSOS[i];
+
+    tl.dataset.step = i;
+    yearEl.textContent = p.label;
+    yearEl.classList.remove('is-tick'); void yearEl.offsetWidth; yearEl.classList.add('is-tick');
+    contaDias(p.dias);
+
+    pinta(nc, p.nc);
+    pinta(gen, p.gen);
+    gen.style.setProperty('--jk', p.gen.jk);
+    gen.classList.toggle('is-dry',     i >= 1);
+    gen.classList.toggle('is-crack',   i >= 2);
+    gen.classList.toggle('is-worn',    i >= 3);
+    gen.classList.toggle('is-swapped', i >= 4);
+
+    if (tripsEl.textContent !== p.trocas) {
+      tripsEl.textContent = p.trocas;
+      tripsEl.classList.remove('is-bump'); void tripsEl.offsetWidth; tripsEl.classList.add('is-bump');
+    }
+
+    fill.style.width = `${(i / ULTIMO) * 100}%`;
+    stops.forEach((b, k) => {
+      b.setAttribute('aria-selected', k === i);
+      b.tabIndex = k === i ? 0 : -1;
+      b.classList.toggle('is-past', k <= i);
+    });
+  };
+
+  /* play / pause */
+  const para = () => { clearInterval(timer); timer = null; tl.classList.remove('is-playing'); };
+  const toca = () => {
+    if (atual >= ULTIMO) vaiPara(0);
+    tl.classList.add('is-playing');
+    timer = setInterval(() => { atual >= ULTIMO ? para() : vaiPara(atual + 1); }, 1700);
+  };
+  playBtn.addEventListener('click', () => (timer ? para() : toca()));
+
+  /* toque nos anos + teclado */
+  stops.forEach(b => b.addEventListener('click', () => { para(); vaiPara(+b.dataset.step); }));
+  track.addEventListener('keydown', (e) => {
+    const mov = { ArrowRight: 1, ArrowLeft: -1, Home: -99, End: 99 }[e.key];
+    if (mov === undefined) return;
+    e.preventDefault(); para();
+    vaiPara(atual + mov);
+    stops[atual].focus();
+  });
+
+  /* arrastar na régua */
+  const passoDoPonto = (x) => {
+    const r = track.getBoundingClientRect();
+    return Math.round(Math.max(0, Math.min(1, (x - r.left) / r.width)) * ULTIMO);
+  };
+  track.addEventListener('pointerdown', (e) => {
+    para();
+    track.setPointerCapture(e.pointerId);
+    vaiPara(passoDoPonto(e.clientX));
+    const move = (ev) => vaiPara(passoDoPonto(ev.clientX));
+    const solta = () => { track.removeEventListener('pointermove', move); track.removeEventListener('pointerup', solta); track.removeEventListener('pointercancel', solta); };
+    track.addEventListener('pointermove', move);
+    track.addEventListener('pointerup', solta);
+    track.addEventListener('pointercancel', solta);
+  });
+
+  /* deslizar os cabos pro lado (swipe) */
+  let x0 = null, y0 = null;
+  stage.addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+  stage.addEventListener('touchend', (e) => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+    x0 = null;
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+    para();
+    vaiPara(atual + (dx < 0 ? 1 : -1));
+  });
+
+  vaiPara(0);
+
+  /* toca sozinho uma vez quando a seção aparece */
+  if (!reduceMotion) {
+    const io = new IntersectionObserver((ents) => {
+      if (!ents[0].isIntersecting) return;
+      io.disconnect();
+      setTimeout(() => { if (atual === 0 && !timer) toca(); }, 600);
+    }, { threshold: 0.55 });
+    io.observe(stage);
+  }
+})();
 
 /* =========================================================
    6. FORMULÁRIO EM 3 PASSOS
