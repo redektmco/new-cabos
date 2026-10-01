@@ -571,11 +571,3 @@ select option{background:#fff;color:var(--txt)}
 .calc__out .tag--mid{color:#FFC24B}
 .calc__out .tag--no{color:#FF8A80}
 .calc__out .calc__ctaNote{color:#8FA5C0}
-
-/* calculadora simples: bitola · metragem · cor */
-.calc--simple{display:block;max-width:760px;margin-inline:auto}
-.calc__line{margin-bottom:22px;padding-bottom:22px;border-bottom:1px solid var(--line)}
-.calc__lineTitle{font-weight:700;margin:0 0 12px}
-.calc__lineRow{grid-template-columns:repeat(3,1fr);margin-bottom:0}
-.calc__lineRow input,.calc__lineRow select{width:100%}
-@media (max-width:680px){.calc__lineRow{grid-template-columns:1fr}}

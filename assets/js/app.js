@@ -188,47 +188,147 @@ const CALC = {
   folga: 1.10,        // 10% de folga na metragem
 };
 
+let calcState = null;
+
 (function calculadora() {
-  const wrap = $('#calcLines');
-  if (!wrap) return;
+  const form = $('#calcForm');
+  if (!form) return;
 
-  const bitolas = [4, 6, 10, 16];
-  const cores = ['Preto', 'Vermelho', 'Verde'];
-  const opts = (arr, fmt) => arr.map(v => `<option value="${v}">${fmt(v)}</option>`).join('');
+  const inPot = $('#inPot'), inDist = $('#inDist'), inStr = $('#inStr');
+  const inTensao = $('#inTensao'), inCorr = $('#inCorr');
+  const gaugeEl = $('#resGauge'), gaugeWrap = $('.calc__gauge');
 
-  const addLine = () => {
-    const n = wrap.children.length + 1;
-    const row = document.createElement('div');
-    row.className = 'calc__line';
-    row.innerHTML = `
-      <p class="calc__lineTitle">Produto ${n}</p>
-      <div class="field--row calc__lineRow">
-        <div><label>Bitola</label><select data-f="bitola">${opts(bitolas, v => v + ' mm²')}</select></div>
-        <div><label>Metragem</label><input type="number" data-f="metros" min="1" step="1" inputmode="numeric" placeholder="Ex.: 500"></div>
-        <div><label>Cor</label><select data-f="cor">${opts(cores, v => v)}</select></div>
-      </div>`;
-    wrap.appendChild(row);
+  const paintRange = (el) => {
+    const p = ((el.value - el.min) / (el.max - el.min)) * 100;
+    el.style.setProperty('--p', `${p}%`);
   };
-  addLine();
-  $('#calcAdd')?.addEventListener('click', addLine);
 
-  // CTA → leva os dados para o formulário
-  $('#calcCta')?.addEventListener('click', () => {
-    const itens = [...wrap.children].map(r => ({
-      bitola: $('[data-f=bitola]', r).value,
-      metros: +$('[data-f=metros]', r).value,
-      cor: $('[data-f=cor]', r).value,
+  const quedaPct = (secao, dist, corrente, tensao) =>
+    ((2 * CALC.rho * dist * corrente) / secao) / tensao * 100;
+
+  const compute = () => {
+    const pot     = +inPot.value;
+    const dist    = +inDist.value;
+    const strings = +inStr.value;
+    const tensao  = +inTensao.value;
+    const corr    = +inCorr.value;
+
+    const secoes = [4, 6, 10, 16];
+    const linhas = secoes.map(s => ({
+      secao: s,
+      queda: quedaPct(s, dist, corr, tensao),
+      amp: GAUGES[s].amp,
+      ampOk: GAUGES[s].amp >= corr * 1.25, // fator de segurança usual do lado CC
     }));
-    const txt = 'Pedido pelo site:\n' + itens.map(i =>
-      `• ${i.bitola} mm² · ${i.metros ? nf(i.metros) + ' m' : 'metragem a definir'} · ${i.cor}`).join('\n');
-    const msg = $('#wMsg');
-    if (msg) msg.value = txt;
-    const sel = new Set(itens.map(i => `${i.bitola} mm²`));
-    $$('[data-choice=bitolas] .chip-btn').forEach(c => c.classList.toggle('is-on', sel.has(c.dataset.value)));
-    const total = itens.reduce((a, i) => a + i.metros, 0);
-    const met = $('#wMetros');
-    if (met && total) met.value = `${nf(total)} m`;
+
+    // escolhe a menor bitola que atende ampacidade e meta de queda
+    let pick = linhas.find(l => l.ampOk && l.queda <= CALC.metaQueda);
+    let motivo = 'É o cabo mais fino que dá conta da sua obra sem desperdiçar energia.';
+    if (!pick) {
+      pick = linhas.find(l => l.ampOk && l.queda <= CALC.limiteQueda);
+      motivo = 'Nessa distância nenhum cabo fica perfeito. Esse é o melhor. Se der, tente deixar o inversor mais perto.';
+    }
+    if (!pick) {
+      pick = linhas[linhas.length - 1];
+      motivo = 'A distância é grande demais desse jeito. Fala com a gente: talvez valha mudar o inversor de lugar.';
+    }
+
+    const metros = Math.ceil((dist * 2 * strings * CALC.folga) / 10) * 10;
+
+    // perda anual se descer uma bitola
+    const idx = secoes.indexOf(pick.secao);
+    const menor = idx > 0 ? linhas[idx - 1] : null;
+    const deltaQueda = menor ? Math.max(menor.queda - pick.queda, 0) : 0;
+    const perdaKwh = pot * CALC.hsp * 365 * (deltaQueda / 100);
+    const perdaRs  = perdaKwh * CALC.tarifa;
+
+    return { pot, dist, strings, tensao, corr, linhas, pick, motivo, metros, menor, perdaKwh, perdaRs };
+  };
+
+  const render = () => {
+    const r = compute();
+    calcState = r;
+
+    $('#outPot').textContent  = `${r.pot} kWp`;
+    $('#outDist').textContent = `${r.dist} m`;
+    $('#outStr').textContent  = r.strings;
+
+    if (gaugeEl.textContent !== String(r.pick.secao)) {
+      gaugeEl.textContent = r.pick.secao;
+      gaugeWrap.classList.remove('is-flip');
+      void gaugeWrap.offsetWidth;
+      gaugeWrap.classList.add('is-flip');
+    }
+    $('#resWhy').textContent = r.motivo;
+
+    // queda
+    $('#resDrop').textContent = `${nf(r.pick.queda, 2)}%`.replace('.', ',');
+    const meter = $('#resMeter');
+    const w = Math.min((r.pick.queda / CALC.limiteQueda) * 100, 100);
+    meter.style.width = `${w}%`;
+    meter.classList.remove('is-warn', 'is-bad');
+    let hint = 'Tudo certo: perde bem pouco';
+    if (r.pick.queda > CALC.metaQueda)  { meter.classList.add('is-warn'); hint = 'Dá pra usar, mas vale tentar encurtar o caminho'; }
+    if (r.pick.queda > CALC.limiteQueda){ meter.classList.remove('is-warn'); meter.classList.add('is-bad'); hint = 'Perde demais. Revise a obra antes de comprar'; }
+    $('#resDropHint').textContent = hint;
+
+    // metragem
+    $('#resMeters').textContent = `${nf(r.metros)} m`;
+
+    // perda
+    const box = $('#resLossBox');
+    if (r.menor) {
+      box.hidden = false;
+      $('#resLoss').textContent = `~ ${nf(Math.round(r.perdaKwh))} kWh/ano`;
+      $('#resLossMoney').textContent =
+        `uns R$ ${nf(Math.round(r.perdaRs))} por ano indo embora se usar ${r.menor.secao} mm² no lugar do ${r.pick.secao} mm²`;
+      $('#resLossBox .metric__k').textContent = `Se usar o de ${r.menor.secao} mm²`;
+    } else {
+      box.hidden = true;
+    }
+
+    // tabela
+    $('#resTable').innerHTML = r.linhas.map(l => {
+      let tag = '<span class="tag tag--ok">Pode usar</span>';
+      if (!l.ampOk)                        tag = '<span class="tag tag--no">Fino demais</span>';
+      else if (l.queda > CALC.limiteQueda) tag = '<span class="tag tag--no">Perde muito</span>';
+      else if (l.queda > CALC.metaQueda)   tag = '<span class="tag tag--mid">Dá pra usar</span>';
+      // .tag é renderizado como texto com marcador (ver styles.css), não como cápsula
+      return `<tr class="${l.secao === r.pick.secao ? 'is-pick' : ''}">
+        <td>${l.secao} mm²</td>
+        <td>${nf(l.queda, 2).replace('.', ',')}%</td>
+        <td>${l.amp} A</td>
+        <td>${tag}</td></tr>`;
+    }).join('');
+  };
+
+  [inPot, inDist, inStr].forEach(el => {
+    paintRange(el);
+    el.addEventListener('input', () => { paintRange(el); render(); });
   });
+  [inTensao, inCorr].forEach(el => el.addEventListener('change', render));
+
+  // CTA da calculadora → leva os números para o formulário
+  $('#calcCta')?.addEventListener('click', () => {
+    if (!calcState) return;
+    const r = calcState;
+    const txt =
+`Usei a calculadora do site:
+• Sistema de ${r.pot} kWp, com ${r.strings} fileira(s) de placas
+• O inversor fica a ${r.dist} m das placas
+• Placas: ~${r.tensao} V / ${r.corr} A
+• Cabo indicado: ${r.pick.secao} mm² (perde ${nf(r.pick.queda, 2).replace('.', ',')}%)
+• Metros estimados: ${nf(r.metros)} m`;
+    const msg = $('#wMsg');
+    if (msg) { msg.value = txt; }
+    // pré-marca a bitola no passo 2
+    $$('[data-choice=bitolas] .chip-btn').forEach(c =>
+      c.classList.toggle('is-on', c.dataset.value === `${r.pick.secao} mm²`));
+    const met = $('#wMetros');
+    if (met && !met.value) met.value = `${nf(r.metros)} m`;
+  });
+
+  render();
 })();
 
 /* =========================================================
