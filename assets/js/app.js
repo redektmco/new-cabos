@@ -136,7 +136,7 @@ const GAUGES = {
 (function contatos() {
   const msgs = {
     fab:     `Oi! Vim pelo site da ${CONFIG.empresa} e queria falar sobre cabo solar.`,
-    direto:  `Oi! Queria um preço de cabo solar da ${CONFIG.empresa}.`,
+    direto:  `Oi! Queria solicitar uma cotação de cabo solar da ${CONFIG.empresa}.`,
     footer:  `Oi! Vim pelo site da ${CONFIG.empresa} e queria mais informações sobre cabo solar.`,
   };
   $$('[data-wa]').forEach(a => { a.href = waLink(msgs[a.dataset.wa] || msgs.direto); a.target = '_blank'; a.rel = 'noopener'; });
@@ -184,19 +184,19 @@ const GAUGES = {
 
   const PASSOS = [
     { label: 'Dia 1',   dias: 0,    trocas: '0',
-      nc:  { st: 'Novo',           cls: 'is-ok',  bar: 100, txt: 'Metragem marcada de metro em metro e laudo.' },
-      gen: { st: 'Novo',           cls: 'is-ok',  bar: 100, txt: 'Parece igual. Mas sem marcação e sem laudo.', jk: '#1D2128' } },
+      nc:  { st: 'Novo',           cls: 'is-ok',  bar: 100, txt: 'Metragem marcada de metro em metro e documentação.' },
+      gen: { st: 'Novo',           cls: 'is-ok',  bar: 100, txt: 'Parece igual. Mas sem marcação e sem documentação.', jk: '#1D2128' } },
     { label: '1 ano',   dias: 365,  trocas: '0',
-      nc:  { st: 'Como novo',      cls: 'is-ok',  bar: 98,  txt: 'Capa dupla firme, aguenta sol de frente.' },
-      gen: { st: 'Ressecando',     cls: 'is-mid', bar: 75,  txt: 'O sol começa a ressecar a capa.', jk: '#3A3530' } },
+      nc:  { st: 'Como novo',      cls: 'is-ok',  bar: 98,  txt: 'Capa dupla firme, com resistência UV.' },
+      gen: { st: 'Ressecando',     cls: 'is-mid', bar: 75,  txt: 'Sem resistência UV, o sol resseca a capa.', jk: '#3A3530' } },
     { label: '3 anos',  dias: 1095, trocas: '0',
       nc:  { st: 'Sem rachaduras', cls: 'is-ok',  bar: 96,  txt: 'Conector limpo, sem oxidação.' },
-      gen: { st: 'Rachando',       cls: 'is-bad', bar: 40,  txt: 'A capa racha. Risco de curto e de o inversor desligar.', jk: '#5E5347' } },
+      gen: { st: 'Rachando',       cls: 'is-bad', bar: 40,  txt: 'A capa racha. Risco de falha e de parada do sistema.', jk: '#5E5347' } },
     { label: '10 anos', dias: 3650, trocas: '1',
       nc:  { st: 'Funcionando',    cls: 'is-ok',  bar: 92,  txt: 'Capa e cobre estanhado em boas condições.' },
       gen: { st: 'Hora de trocar', cls: 'is-bad', bar: 12,  txt: 'Cobre exposto. Equipe de volta ao telhado.', jk: '#7D6E5D' } },
     { label: '25 anos', dias: 9125, trocas: '2+',
-      nc:  { st: 'Funcionando',    cls: 'is-ok',  bar: 88,  txt: 'Feito pra durar a vida útil do sistema.' },
+      nc:  { st: 'Funcionando',    cls: 'is-ok',  bar: 88,  txt: 'Projetado para a vida útil do sistema.' },
       gen: { st: 'Trocado de novo', cls: 'is-bad', bar: 20, txt: 'Já foi trocado uma ou mais vezes.', jk: '#8A7965' } },
   ];
   const ULTIMO = PASSOS.length - 1;
@@ -340,44 +340,153 @@ const GAUGES = {
   const btnBack = $('#wizBack'), btnNext = $('#wizNext'), btnSend = $('#wizSend');
   const alt = $('#wizAlt'), done = $('#wizDone');
 
-  const titles = ['O que você faz', 'Do que você precisa', 'Seus dados'];
-  const data = { perfil: '', bitolas: [], prazo: '' };
+  const titles = ['Quem é você', 'Produtos', 'Seus dados'];
+  const BITOLAS = ['4', '6', '10', '16'];
+  const CORES   = ['Preto', 'Vermelho', 'Verde'];
+  const data = { perfil: '', pessoa: '' };
+  const cnpj = { razao: '', local: '' };   // preenchido pela consulta, se der certo
   let step = 1;
 
   /* --- seleção de cards e chips --- */
   $$('[data-choice]').forEach(group => {
     const key = group.dataset.choice;
-    const multi = group.dataset.multi === 'true';
     $$('button', group).forEach(b => b.addEventListener('click', () => {
-      if (multi) {
-        b.classList.toggle('is-on');
-        data[key] = $$('button.is-on', group).map(x => x.dataset.value);
-      } else {
-        $$('button', group).forEach(x => x.classList.remove('is-on'));
-        b.classList.add('is-on');
-        data[key] = b.dataset.value;
-      }
+      $$('button', group).forEach(x => x.classList.remove('is-on'));
+      b.classList.add('is-on');
+      data[key] = b.dataset.value;
       hideErr(key);
+      if (key === 'pessoa') mostraCnpj();
     }));
   });
 
   const showErr = (k) => { const e = $(`[data-err="${k}"]`); if (e) e.hidden = false; };
   const hideErr = (k) => { const e = $(`[data-err="${k}"]`); if (e) e.hidden = true; };
 
+  /* --- passo 2: lista de produtos (bitola · metragem · cor) --- */
+  const itemsEl = $('#items');
+  const opts = (arr, fmt) => arr.map(v => `<option value="${v}">${fmt(v)}</option>`).join('');
+
+  const novoItem = () => {
+    const row = document.createElement('div');
+    row.className = 'item';
+    row.innerHTML = `
+      <div class="item__head"><b>Produto <span data-n></span></b>
+        <button type="button" class="item__rm" aria-label="Remover este produto">Remover</button></div>
+      <div class="item__grid">
+        <label class="wiz__field">Bitola
+          <select data-f="bitola"><option value="">Selecione</option>${opts(BITOLAS, v => v + ' mm²')}</select>
+        </label>
+        <label class="wiz__field">Metragem
+          <input type="text" data-f="metros" inputmode="numeric" placeholder="Ex.: 2.000 m">
+        </label>
+        <label class="wiz__field">Cor
+          <select data-f="cor"><option value="">Selecione</option>${opts(CORES, v => v)}</select>
+        </label>
+      </div>`;
+    $('[data-f=metros]', row).addEventListener('input', (e) => {
+      const v = e.target.value.replace(/\D/g, '').slice(0, 7);
+      e.target.value = v ? nf(+v) : '';
+      hideErr('itens');
+    });
+    $$('select', row).forEach(sel => sel.addEventListener('change', () => hideErr('itens')));
+    $('.item__rm', row).addEventListener('click', () => { row.remove(); numeraItens(); });
+    itemsEl.appendChild(row);
+    numeraItens();
+  };
+
+  const numeraItens = () => {
+    const rows = $$('.item', itemsEl);
+    rows.forEach((r, i) => {
+      $('[data-n]', r).textContent = i + 1;
+      $('.item__rm', r).hidden = rows.length === 1;
+    });
+  };
+
+  const lerItens = () => $$('.item', itemsEl).map(r => ({
+    bitola: $('[data-f=bitola]', r).value,
+    metros: $('[data-f=metros]', r).value.trim(),
+    cor:    $('[data-f=cor]', r).value,
+  }));
+
+  $('#itemAdd').addEventListener('click', () => {
+    novoItem();
+    const rows = $$('.item', itemsEl);
+    $('select', rows[rows.length - 1]).focus();
+  });
+  novoItem();
+
+  /* --- passo 3: PF/PJ e CNPJ --- */
+  const cnpjBox = $('#cnpjBox'), cnpjIn = $('#wCnpj'), cnpjInfo = $('#cnpjInfo');
+
+  const mostraCnpj = () => { cnpjBox.hidden = data.pessoa !== 'PJ'; };
+
+  // aceita o CNPJ alfanumérico (a partir de jul/2026): 12 caracteres + 2 dígitos
+  const limpaCnpj = (v) => v.toUpperCase().replace(/[^0-9A-Z]/g, '').slice(0, 14);
+  const mascaraCnpj = (c) => [c.slice(0, 2), c.slice(2, 5), c.slice(5, 8)].filter(Boolean).join('.')
+    + (c.length > 8 ? '/' + c.slice(8, 12) : '') + (c.length > 12 ? '-' + c.slice(12) : '');
+  const cnpjConfere = (c) => {
+    if (c.length !== 14 || !/^\d{2}$/.test(c.slice(12))) return false;
+    const dv = (base) => {
+      const pesos = base.length === 12 ? [5,4,3,2,9,8,7,6,5,4,3,2] : [6,5,4,3,2,9,8,7,6,5,4,3,2];
+      const soma = [...base].reduce((t, ch, i) => t + (ch.charCodeAt(0) - 48) * pesos[i], 0);
+      const r = soma % 11;
+      return r < 2 ? 0 : 11 - r;
+    };
+    const d1 = dv(c.slice(0, 12));
+    return d1 === +c[12] && dv(c.slice(0, 12) + d1) === +c[13];
+  };
+
+  let consultaId = 0;
+  const consultaCnpj = async (c) => {
+    const id = ++consultaId;
+    cnpj.razao = ''; cnpj.local = '';
+    cnpjInfo.hidden = false; cnpjInfo.className = 'wiz__hint';
+    cnpjInfo.textContent = 'Buscando o nome da empresa…';
+    try {
+      const ctl = new AbortController();
+      const t = setTimeout(() => ctl.abort(), 6000);
+      const r = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${c}`, { signal: ctl.signal });
+      clearTimeout(t);
+      if (!r.ok) throw new Error(r.status);
+      const j = await r.json();
+      if (id !== consultaId) return;
+      cnpj.razao = (j.razao_social || '').trim();
+      cnpj.local = [j.municipio, j.uf].filter(Boolean).join('/');
+      cnpjInfo.className = 'wiz__hint is-ok';
+      cnpjInfo.textContent = cnpj.razao ? `✓ ${cnpj.razao}${cnpj.local ? ' · ' + cnpj.local : ''}` : '✓ CNPJ encontrado';
+    } catch (_) {
+      if (id !== consultaId) return;
+      cnpjInfo.className = 'wiz__hint';
+      cnpjInfo.textContent = 'Não consegui buscar o nome da empresa agora. Sem problema, pode continuar.';
+    }
+  };
+
+  cnpjIn.addEventListener('input', () => {
+    const c = limpaCnpj(cnpjIn.value);
+    cnpjIn.value = mascaraCnpj(c);
+    hideErr('cnpj');
+    consultaId++;
+    cnpj.razao = ''; cnpj.local = '';
+    if (c.length === 14 && cnpjConfere(c)) consultaCnpj(c);
+    else if (c.length === 14) { cnpjInfo.hidden = false; cnpjInfo.className = 'wiz__hint'; cnpjInfo.textContent = 'Esse CNPJ parece estar incorreto. Confira os números.'; }
+    else cnpjInfo.hidden = true;
+  });
+
   const valida = (s) => {
     if (s === 1) {
       if (!data.perfil) { showErr('perfil'); return false; }
     }
     if (s === 2) {
-      let ok = true;
-      if (!data.bitolas.length) { showErr('bitolas'); ok = false; }
-      if (!data.prazo)          { showErr('prazo');   ok = false; }
-      if (!ok) return false;
+      const ok = lerItens().every(i => i.bitola && i.cor && +i.metros.replace(/\D/g, '') > 0);
+      if (!ok) { showErr('itens'); return false; }
     }
     if (s === 3) {
+      let ok = true;
       const nome = $('#wNome').value.trim(), fone = $('#wFone').value.trim();
-      if (!nome || fone.replace(/\D/g, '').length < 10) { showErr('contato'); return false; }
-      hideErr('contato');
+      if (!nome || fone.replace(/\D/g, '').length < 10) { showErr('contato'); ok = false; } else hideErr('contato');
+      if (!data.pessoa) { showErr('pessoa'); ok = false; }
+      if (data.pessoa === 'PJ' && limpaCnpj(cnpjIn.value).length !== 14) { showErr('cnpj'); ok = false; }
+      if (!ok) return false;
     }
     return true;
   };
@@ -416,20 +525,22 @@ const GAUGES = {
   /* --- monta a mensagem --- */
   const montaMensagem = () => {
     const g = (id) => $(id).value.trim();
+    const itens = lerItens().map(i => `• ${i.bitola} mm² · ${i.cor} · ${i.metros} m`);
+    const pj = data.pessoa === 'PJ';
     const linhas = [
-      `*Pedido de preço — site ${CONFIG.empresa}*`,
+      `*Pedido de cotação — site ${CONFIG.empresa}*`,
       '',
-      `*O que faz:* ${data.perfil}`,
-      `*Quer:* ${data.bitolas.join(', ')}`,
-      g('#wMetros') ? `*Metros:* ${g('#wMetros')}` : null,
-      `*Prazo:* ${data.prazo}`,
+      `*Perfil:* ${data.perfil}`,
+      '*Produtos (bitola · cor · metragem):*',
+      ...itens,
       '',
       `*Nome:* ${g('#wNome')}`,
-      g('#wEmpresa') ? `*Empresa:* ${g('#wEmpresa')}` : null,
+      `*Tipo:* ${pj ? 'Pessoa jurídica' : 'Pessoa física'}`,
+      pj ? `*CNPJ:* ${g('#wCnpj')}${cnpj.razao ? ' — ' + cnpj.razao : ''}` : null,
+      pj && cnpj.local ? `*Cidade:* ${cnpj.local}` : null,
       `*WhatsApp:* ${g('#wFone')}`,
-      g('#wEmail')  ? `*E-mail:* ${g('#wEmail')}`   : null,
-      g('#wCidade') ? `*Cidade:* ${g('#wCidade')}`  : null,
-      g('#wMsg')    ? `\n*Sobre a obra:*\n${g('#wMsg')}` : null,
+      g('#wEmail') ? `*E-mail:* ${g('#wEmail')}` : null,
+      g('#wMsg')   ? `\n*Sobre a obra/pedido:*\n${g('#wMsg')}` : null,
     ].filter(Boolean);
     return linhas.join('\n');
   };
@@ -437,7 +548,7 @@ const GAUGES = {
   const enviar = (canal) => {
     const msg = montaMensagem();
     if (canal === 'email') {
-      const assunto = `Pedido de preço de cabo solar — ${$('#wNome').value.trim()}`;
+      const assunto = `Pedido de cotação de cabo solar — ${$('#wNome').value.trim()}`;
       window.location.href =
         `mailto:${CONFIG.email}?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(msg.replace(/\*/g, ''))}`;
       return;
