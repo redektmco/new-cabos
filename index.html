@@ -47,7 +47,7 @@
     <nav class="nav" id="nav" aria-label="Navegação principal">
       <a href="#porque">Por que a New Cabos</a>
       <a href="#calculadora">Comparativo</a>
-      <a href="#orcamento">Solicitar cotação</a>
+      <a class="btn btn--primary nav__cta" href="#orcamento" data-track="nav-cta">Solicitar cotação</a>
     </nav>
 
     <div class="header__cta">
@@ -157,10 +157,6 @@
     <header class="sec__head reveal">
       <p class="kicker">Compra direta da fábrica</p>
       <h2>Por que comprar seu cabo solar direto da New Cabos?</h2>
-      <p class="sec__lead">
-        Pouco do custo da obra. Muito da responsabilidade pelo seu desempenho.
-        Por isso o cabo precisa vir de quem controla a fabricação.
-      </p>
     </header>
 
     <div class="pain-grid">
@@ -202,8 +198,7 @@
       <div class="factory__copy">
         <h3>Fabricação própria, do cobre ao produto final</h3>
         <p>
-          O cobre entra de um lado da fábrica e o rolo pronto sai do outro. Comprar direto da fábrica
-          pode reduzir custos e simplificar sua operação.
+          Comprar direto da fábrica pode reduzir custos e simplificar sua operação.
         </p>
         <ul class="factory__list">
           <li><b>5.000 m²</b><span>de fábrica própria em Sorocaba-SP</span></li>
@@ -215,8 +210,8 @@
 
     <aside class="brand-strip reveal">
       <div>
-        <h3>Marca própria para revendedores</h3>
-        <p>Gravamos a sua marca no cabo. Ideal para distribuidores e lojas que querem vender com a própria identidade.</p>
+        <h3>Sua marca estampada no cabo.</h3>
+        <p>Ideal para distribuidores e lojas que querem oferecer produtos com identidade própria e fortalecer sua marca no mercado.</p>
       </div>
       <a class="btn btn--primary" href="#orcamento" data-track="brand-cta">Solicitar cotação</a>
     </aside>
@@ -228,8 +223,9 @@
   <div class="wrap">
     <header class="sec__head reveal">
       <p class="kicker">Comparativo</p>
-      <h2>Como cada cabo se comporta ao longo do tempo</h2>
-      <p class="sec__lead">No dia da instalação eles parecem iguais. A diferença aparece depois de alguns verões no telhado: cabo comum não possui resistência UV.</p>
+      <h2>Por fora, podem parecer iguais. No telhado, a história é outra.</h2>
+      <p class="sec__lead">No dia da instalação, a diferença nem sempre é visível. Mas, após anos de exposição ao sol e às intempéries, a qualidade e a resistência do material fazem toda a diferença.</p>
+      <p class="sec__lead">Proteção contra raios UV significa mais resistência e maior durabilidade para a instalação.</p>
     </header>
 
     <div class="tl reveal" id="tl">
@@ -305,6 +301,25 @@
 
       <p class="tl__note">Comparativo ilustrativo entre cabo solar e cabo genérico sem certificação. O desempenho real depende da instalação e do local.</p>
 
+      <div class="uv-vs reveal">
+        <div class="uv-vs__card uv-vs__card--bad">
+          <h3>Cabo comum</h3>
+          <ul>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg> Sem proteção UV adequada</li>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg> Maior exposição à degradação causada pelo sol</li>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg> Pode comprometer a durabilidade da instalação</li>
+          </ul>
+        </div>
+        <div class="uv-vs__card uv-vs__card--ok">
+          <h3>Cabo com proteção UV</h3>
+          <ul>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Desenvolvido para exposição solar</li>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Maior resistência às intempéries</li>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Mais durabilidade e confiabilidade ao longo do tempo</li>
+          </ul>
+        </div>
+      </div>
+
       <div class="spec-table reveal" role="region" aria-label="Comparativo de características" tabindex="0">
         <table>
           <caption>Compare por características verificáveis</caption>
@@ -338,9 +353,8 @@
         <p class="kicker">Cotação para empresas</p>
         <h2>Solicite uma cotação</h2>
         <p>
-          Informe a seção, quantidade e prazo. Nossa equipe retorna com preço,
-          disponibilidade e condições de entrega. Atendemos de pequenos pedidos
-          até projetos de grande porte.
+          Informe a seção, quantidade e prazo de entrega. Nossa equipe consultará as melhores
+          condições e retornará com o preço, disponibilidade e prazo de entrega.
         </p>
 
         <ul class="quote-box__list">
@@ -481,7 +495,6 @@
       <h4>Navegue</h4>
       <a href="#porque">Por que a New Cabos</a>
       <a href="#calculadora">Comparativo</a>
-      <a href="#orcamento">Solicitar cotação</a>
     </div>
 
     <div class="footer__col">
