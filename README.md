@@ -64,7 +64,7 @@ filete, status são texto com marcador, e os controles usam canto de 10–12px.
    tensão e corrente entram; saem grossura recomendada, energia perdida,
    metragem e quanto se perde por ano ao descer uma grossura. O CTA leva os
    números direto para o formulário.
-4. **Orçamento** (`#orcamento`) — formulário em 3 passos + WhatsApp direto.
+4. **Orçamento** (`#orcamento`) — formulário em 3 passos enviando para o n8n.
    Marca própria, frete e entrega nacional viraram argumentos do lado esquerdo.
 
 Anatomia do cabo, linha do tempo comparativa, abas de produto, abas por perfil,
@@ -75,13 +75,19 @@ dobras; o essencial de cada um foi incorporado nas dobras 2, 3 e 4.
 
 ## Como o formulário envia
 
-Não há backend. O envio monta uma mensagem formatada e abre o WhatsApp do
-comercial já preenchido (com alternativa por e-mail). Isso funciona bem para
-B2B no Brasil e não depende de servidor.
+O formulário envia os dados em JSON (POST) para um webhook do n8n. A URL
+fica em `CONFIG.webhook`, no topo de `assets/js/app.js`.
 
-Para plugar um CRM, RD Station ou endpoint próprio depois, só é preciso trocar
-a função `enviar()` em `assets/js/app.js` — todo o resto do formulário
-continua igual.
+**Enquanto `CONFIG.webhook` estiver vazio, nenhum lead é enviado**: o
+visitante vê uma mensagem de erro com o telefone e o e-mail da New Cabos.
+
+Campos enviados: `origem`, `enviado_em`, `pagina`, `perfil`, `produtos`
+(lista com `bitola_mm2`, `metragem_m`, `cor`), `nome`, `tipo_pessoa`, `cnpj`,
+`razao_social`, `cidade`, `telefone`, `email`, `mensagem`, `resumo` (texto
+pronto) e, se vierem na URL, `utm_*`, `gclid` e `fbclid`.
+
+No n8n, o nó Webhook precisa aceitar POST e responder 200; se responder erro,
+o visitante vê a mensagem de erro.
 
 ---
 

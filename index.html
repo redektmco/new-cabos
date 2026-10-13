@@ -358,17 +358,13 @@
 
         <ul class="quote-box__list">
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Resposta em até 1 dia útil</li>
-          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Você fala diretamente com nossa equipe, pelo WhatsApp</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Você fala diretamente com nossa equipe</li>
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Entrega no Brasil todo, com o frete já no preço</li>
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Revende? Gravamos a sua marca no cabo</li>
         </ul>
 
         <div class="quote-box__direct">
           <p>Prefere resolver agora?</p>
-          <a class="btn btn--wa btn--block" href="#" data-wa="direto" data-track="aside-wa">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 004.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.17c-.25.69-1.44 1.32-1.99 1.36-.53.04-1.02.23-3.44-.72-2.9-1.14-4.73-4.1-4.87-4.29-.14-.19-1.16-1.54-1.16-2.94s.73-2.08 1-2.37c.26-.29.57-.36.76-.36l.55.01c.18 0 .42-.07.65.5.25.6.84 2.08.91 2.23.07.15.12.32.02.51-.09.19-.14.31-.28.48l-.42.49c-.14.14-.28.29-.12.57.16.29.71 1.17 1.53 1.9 1.05.94 1.94 1.23 2.22 1.37.28.15.44.12.6-.07.17-.19.7-.81.88-1.09.19-.29.37-.24.63-.14.25.09 1.6.75 1.88.89.27.14.46.21.53.33.07.11.07.66-.18 1.34z" fill="currentColor"/></svg>
-            Chamar no WhatsApp
-          </a>
           <p class="quote-box__phone">
             <a href="#" data-tel="link">Telefone comercial</a> · <a href="#" data-mail="link">E-mail</a>
           </p>
@@ -442,7 +438,7 @@
               <p class="wiz__err" data-err="cnpj" hidden>Confira o CNPJ: ele precisa ter 14 caracteres.</p>
             </div>
 
-            <label class="wiz__field" for="wFone">WhatsApp*
+            <label class="wiz__field" for="wFone">Telefone*
               <input type="tel" id="wFone" name="fone" autocomplete="tel" required placeholder="(00) 00000-0000">
             </label>
             <label class="wiz__field" for="wEmail">E-mail
@@ -451,26 +447,22 @@
             <label class="wiz__field" for="wMsg">Sobre a obra ou o pedido
               <textarea id="wMsg" name="msg" rows="3" placeholder="Prazo, local da entrega, tipo de projeto, o que for útil. Ou deixe em branco mesmo."></textarea>
             </label>
-            <p class="wiz__err" data-err="contato" hidden>Precisamos do seu nome e do WhatsApp para te responder.</p>
+            <p class="wiz__err" data-err="contato" hidden>Precisamos do seu nome e do telefone para te responder.</p>
             <p class="wiz__privacy">Seus dados são só para te responder. Não enviamos spam.</p>
           </fieldset>
 
           <div class="wiz__nav">
             <button type="button" class="btn btn--outline" id="wizBack" hidden>Voltar</button>
             <button type="button" class="btn btn--primary" id="wizNext">Continuar</button>
-            <button type="submit" class="btn btn--wa" id="wizSend" hidden>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 004.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.17c-.25.69-1.44 1.32-1.99 1.36-.53.04-1.02.23-3.44-.72-2.9-1.14-4.73-4.1-4.87-4.29-.14-.19-1.16-1.54-1.16-2.94s.73-2.08 1-2.37c.26-.29.57-.36.76-.36l.55.01c.18 0 .42-.07.65.5.25.6.84 2.08.91 2.23.07.15.12.32.02.51-.09.19-.14.31-.28.48l-.42.49c-.14.14-.28.29-.12.57.16.29.71 1.17 1.53 1.9 1.05.94 1.94 1.23 2.22 1.37.28.15.44.12.6-.07.17-.19.7-.81.88-1.09.19-.29.37-.24.63-.14.25.09 1.6.75 1.88.89.27.14.46.21.53.33.07.11.07.66-.18 1.34z" fill="currentColor"/></svg>
-              Enviar no WhatsApp
-            </button>
+            <button type="submit" class="btn btn--primary" id="wizSend" hidden>Enviar pedido de cotação</button>
           </div>
-          <p class="wiz__alt" id="wizAlt" hidden>Prefere e-mail? <a href="#" id="wizMail">Mandar por e-mail</a></p>
+          <p class="wiz__err wiz__sendErr" id="wizSendErr" hidden>Não conseguimos enviar agora. Tente de novo ou fale com a gente: <a href="#" data-tel="link">Telefone</a> · <a href="#" data-mail="link">E-mail</a></p>
         </form>
 
         <div class="wiz__done" id="wizDone" hidden>
           <div class="wiz__doneIcon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <h3>Pronto! Abrimos o WhatsApp com tudo escrito</h3>
-          <p>É só apertar enviar lá na conversa. Se a janela não abriu, clique no botão abaixo.</p>
-          <a class="btn btn--wa" href="#" id="wizRetry">Abrir conversa novamente</a>
+          <h3>Pronto! Recebemos seu pedido</h3>
+          <p>Nossa equipe retorna em até 1 dia útil com preço, disponibilidade e prazo de entrega.</p>
         </div>
       </div>
     </div>
@@ -498,7 +490,6 @@
 
     <div class="footer__col">
       <h4>Contato</h4>
-      <a href="#" data-wa="footer">Chamar no WhatsApp</a>
       <a href="#" data-tel="link">Telefone</a>
       <a href="#" data-mail="link">E-mail</a>
       <p class="footer__addr">Rua Joaquim Machado, 250 — Aparecidinha<br>Sorocaba/SP — CEP 18087-280</p>
@@ -520,11 +511,6 @@
   </div>
 </footer>
 
-<!-- Sticky WhatsApp -->
-<a class="fab" href="#" data-wa="fab" data-track="fab-wa" aria-label="Falar no WhatsApp">
-  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 004.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.17c-.25.69-1.44 1.32-1.99 1.36-.53.04-1.02.23-3.44-.72-2.9-1.14-4.73-4.1-4.87-4.29-.14-.19-1.16-1.54-1.16-2.94s.73-2.08 1-2.37c.26-.29.57-.36.76-.36l.55.01c.18 0 .42-.07.65.5.25.6.84 2.08.91 2.23.07.15.12.32.02.51-.09.19-.14.31-.28.48l-.42.49c-.14.14-.28.29-.12.57.16.29.71 1.17 1.53 1.9 1.05.94 1.94 1.23 2.22 1.37.28.15.44.12.6-.07.17-.19.7-.81.88-1.09.19-.29.37-.24.63-.14.25.09 1.6.75 1.88.89.27.14.46.21.53.33.07.11.07.66-.18 1.34z" fill="currentColor"/></svg>
-  <span>Chamar no WhatsApp</span>
-</a>
 
 <script src="assets/js/app.js" defer></script>
 </body>

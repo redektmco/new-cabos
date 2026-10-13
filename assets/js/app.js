@@ -2,12 +2,14 @@
    NEW CABOS — Landing Page
    Vanilla JS, sem dependências.
    ---------------------------------------------------------
-   ⚠️  AJUSTE AQUI ANTES DE PUBLICAR: telefone, WhatsApp e e-mail.
-   Os valores abaixo são PLACEHOLDERS — troque pelos reais.
+   ⚠️  AJUSTE AQUI: URL do webhook (n8n) que recebe os leads.
+   Enquanto `webhook` estiver vazio, o formulário NÃO envia nada:
+   o visitante vê uma mensagem de erro com telefone e e-mail.
    ========================================================= */
 const CONFIG = {
+  // Cole aqui a URL de produção do webhook do n8n (nó Webhook, método POST)
+  webhook: '',
   // Dados reais, extraídos da LP oficial (lp.newcabos.com.br)
-  whatsapp: '5515997556534',
   telefone: '+5515997556534',
   telefoneLabel: '(15) 99755-6534',
   email: 'contato@newcabos.com.br',
@@ -18,7 +20,6 @@ const CONFIG = {
 const $  = (s, c = document) => c.querySelector(s);
 const $$ = (s, c = document) => [...c.querySelectorAll(s)];
 const nf = (n, d = 0) => n.toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
-const waLink = (msg) => `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`;
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* =========================================================
@@ -48,14 +49,12 @@ const GAUGES = {
 (function chrome() {
   const header = $('#header');
   const bar    = $('#scrollBar');
-  const fab    = $('.fab');
 
   const onScroll = () => {
     const y   = window.scrollY;
     const max = document.documentElement.scrollHeight - window.innerHeight;
     header.classList.toggle('is-stuck', y > 12);
     if (bar) bar.style.width = `${max > 0 ? (y / max) * 100 : 0}%`;
-    if (fab) fab.classList.toggle('is-in', y > 620);
   };
   onScroll();
   window.addEventListener('scroll', onScroll, { passive: true });
@@ -131,15 +130,9 @@ const GAUGES = {
 })();
 
 /* =========================================================
-   3. LINKS DE CONTATO (WhatsApp / tel / e-mail)
+   3. LINKS DE CONTATO (tel / e-mail)
    ========================================================= */
 (function contatos() {
-  const msgs = {
-    fab:     `Oi! Vim pelo site da ${CONFIG.empresa} e queria falar sobre cabo solar.`,
-    direto:  `Oi! Queria solicitar uma cotação de cabo solar da ${CONFIG.empresa}.`,
-    footer:  `Oi! Vim pelo site da ${CONFIG.empresa} e queria mais informações sobre cabo solar.`,
-  };
-  $$('[data-wa]').forEach(a => { a.href = waLink(msgs[a.dataset.wa] || msgs.direto); a.target = '_blank'; a.rel = 'noopener'; });
   $$('[data-tel]').forEach(a => { a.href = `tel:${CONFIG.telefone}`; a.textContent = a.textContent.trim() === 'Telefone comercial' || a.textContent.trim() === 'Telefone' ? CONFIG.telefoneLabel : a.textContent; });
   $$('[data-mail]').forEach(a => { a.href = `mailto:${CONFIG.email}`; if (/E-mail/i.test(a.textContent)) a.textContent = CONFIG.email; });
 })();
@@ -325,10 +318,8 @@ const GAUGES = {
 /* =========================================================
    6. FORMULÁRIO EM 3 PASSOS
    ---------------------------------------------------------
-   Não há backend nesta LP: o envio monta uma mensagem
-   pronta e abre o WhatsApp do comercial (com alternativa
-   por e-mail). Se um dia entrar um CRM/endpoint, troque
-   apenas a função `enviar()`.
+   O envio manda os dados em JSON (POST) para CONFIG.webhook
+   (n8n). Para trocar de destino, mexa só em `enviar()`.
    ========================================================= */
 (function wizard() {
   const form = $('#wizForm');
@@ -338,7 +329,7 @@ const GAUGES = {
   const dots  = $$('[data-wizdot]');
   const label = $('#wizLabel');
   const btnBack = $('#wizBack'), btnNext = $('#wizNext'), btnSend = $('#wizSend');
-  const alt = $('#wizAlt'), done = $('#wizDone');
+  const sendErr = $('#wizSendErr'), done = $('#wizDone');
 
   const titles = ['Quem é você', 'Produtos', 'Seus dados'];
   const BITOLAS = ['4', '6', '10', '16'];
@@ -506,7 +497,7 @@ const GAUGES = {
     btnBack.hidden = s === 1;
     btnNext.hidden = s === 3;
     btnSend.hidden = s !== 3;
-    alt.hidden = s !== 3;
+    sendErr.hidden = true;
     if (scroll) form.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
   };
 
@@ -538,39 +529,68 @@ const GAUGES = {
       `*Tipo:* ${pj ? 'Pessoa jurídica' : 'Pessoa física'}`,
       pj ? `*CNPJ:* ${g('#wCnpj')}${cnpj.razao ? ' — ' + cnpj.razao : ''}` : null,
       pj && cnpj.local ? `*Cidade:* ${cnpj.local}` : null,
-      `*WhatsApp:* ${g('#wFone')}`,
+      `*Telefone:* ${g('#wFone')}`,
       g('#wEmail') ? `*E-mail:* ${g('#wEmail')}` : null,
       g('#wMsg')   ? `\n*Sobre a obra/pedido:*\n${g('#wMsg')}` : null,
     ].filter(Boolean);
     return linhas.join('\n');
   };
 
-  const enviar = (canal) => {
-    const msg = montaMensagem();
-    if (canal === 'email') {
-      const assunto = `Pedido de cotação de cabo solar — ${$('#wNome').value.trim()}`;
-      window.location.href =
-        `mailto:${CONFIG.email}?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(msg.replace(/\*/g, ''))}`;
-      return;
+  /* --- dados do lead, no formato que chega no n8n --- */
+  const montaLead = () => {
+    const g = (id) => $(id).value.trim();
+    const pj = data.pessoa === 'PJ';
+    const qs = new URLSearchParams(location.search);
+    const utm = {};
+    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid', 'fbclid']
+      .forEach(k => { if (qs.get(k)) utm[k] = qs.get(k); });
+    return {
+      origem: `LP ${CONFIG.empresa}`,
+      enviado_em: new Date().toISOString(),
+      pagina: location.href,
+      perfil: data.perfil,
+      produtos: lerItens().map(i => ({ bitola_mm2: i.bitola, metragem_m: i.metros, cor: i.cor })),
+      nome: g('#wNome'),
+      tipo_pessoa: pj ? 'PJ' : 'PF',
+      cnpj: pj ? g('#wCnpj') : '',
+      razao_social: pj ? cnpj.razao : '',
+      cidade: pj ? cnpj.local : '',
+      telefone: g('#wFone'),
+      email: g('#wEmail'),
+      mensagem: g('#wMsg'),
+      resumo: montaMensagem().replace(/\*/g, ''),
+      ...utm,
+    };
+  };
+
+  const enviar = async () => {
+    sendErr.hidden = true;
+    btnSend.disabled = true;
+    btnSend.textContent = 'Enviando…';
+    try {
+      if (!CONFIG.webhook) throw new Error('CONFIG.webhook vazio: lead não enviado');
+      const r = await fetch(CONFIG.webhook, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(montaLead()),
+      });
+      if (!r.ok) throw new Error(`webhook respondeu ${r.status}`);
+      form.hidden = true;
+      done.hidden = false;
+      done.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+    } catch (err) {
+      console.error('[formulário]', err);
+      sendErr.hidden = false;
+    } finally {
+      btnSend.disabled = false;
+      btnSend.textContent = 'Enviar pedido de cotação';
     }
-    const url = waLink(msg);
-    $('#wizRetry').href = url;
-    window.open(url, '_blank', 'noopener');
-    form.hidden = true;
-    done.hidden = false;
-    done.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
   };
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    if (!valida(3)) return;
-    enviar('whatsapp');
-  });
-
-  $('#wizMail').addEventListener('click', (e) => {
-    e.preventDefault();
-    if (!valida(3)) return;
-    enviar('email');
+    if (!valida(3) || btnSend.disabled) return;
+    enviar();
   });
 
   go(1, false); // estado inicial não deve rolar a página
