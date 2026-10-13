@@ -97,7 +97,7 @@ main section[id]{scroll-margin-top:92px}
 .topbar__in{display:flex;justify-content:space-between;align-items:center;gap:20px;padding-block:9px;flex-wrap:wrap}
 .topbar p{margin:0}
 .topbar strong{color:#fff}
-.topbar__alt{opacity:.8}
+
 .pulse-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--good);margin-right:7px;
   box-shadow:0 0 0 0 rgba(52,211,153,.6);animation:pulse 2.4s infinite}
 @keyframes pulse{70%{box-shadow:0 0 0 9px rgba(52,211,153,0)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}
@@ -520,7 +520,7 @@ textarea{resize:vertical;min-height:84px}
   .factory{grid-template-columns:1fr}
   .factory__copy{padding:4px 8px 10px}
   .counters{grid-template-columns:1fr 1fr;gap:24px 16px}
-  .topbar__alt,.topbar__more{display:none}
+  .topbar__more{display:none}
   .topbar{font-size:.78rem;text-align:center}
   .topbar__in{justify-content:center}
   .cable-card__stats{grid-template-columns:1fr}
