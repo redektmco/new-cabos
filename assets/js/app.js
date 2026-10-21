@@ -356,6 +356,7 @@ const commercialOrder = [];
       b.classList.add('is-on');
       data[key] = b.dataset.value;
       hideErr(key);
+      $$('button', group).forEach(x => x.setAttribute('aria-pressed', String(x === b)));
       if (key === 'pessoa') mostraCnpj();
     }));
   });
@@ -363,71 +364,145 @@ const commercialOrder = [];
   const showErr = (k) => { const e = $(`[data-err="${k}"]`); if (e) e.hidden = false; };
   const hideErr = (k) => { const e = $(`[data-err="${k}"]`); if (e) e.hidden = true; };
 
-  /* --- passo 2: lista de produtos (bitola · metragem · cor) --- */
+  /* --- passo 2: cartões de produto e acondicionamento automático --- */
   const itemsEl = $('#items');
-  const opts = (arr, fmt) => arr.map(v => `<option value="${v}">${fmt(v)}</option>`).join('');
-
-  const novoItem = (item = null) => {
-    const row = document.createElement('div');
-    row.className = 'item';
-    row.innerHTML = `
-      <div class="item__head"><b>Produto <span data-n></span></b>
-        <button type="button" class="item__rm" aria-label="Remover este produto">Remover</button></div>
-      <div class="item__grid">
-        <label class="wiz__field">Bitola
-          <select data-f="bitola"><option value="">Selecione</option>${opts(BITOLAS, v => v + ' mm²')}</select>
-        </label>
-        <label class="wiz__field">Metragem por unidade (m)
-          <input type="text" data-f="metros" inputmode="numeric" placeholder="Ex.: 100 m">
-        </label>
-        <label class="wiz__field">Cor
-          <select data-f="cor"><option value="">Selecione</option>${opts(CORES, v => v)}</select>
-        </label>
-        <label class="wiz__field">Quantidade de unidades<input type="number" data-f="quantidade" min="1" max="99999" step="1" value="1" required></label>
-        <label class="wiz__field">Acondicionamento desejado<select data-f="embalagem"><option value="">Padrão da fábrica</option><option>Retalho</option><option>Rolo</option><option>Carretel</option><option>Bobina</option></select></label>
-      </div><p class="wiz__hint" data-package role="status"></p>`;
-    $('[data-f=metros]', row).addEventListener('input', (e) => {
-      const v = e.target.value.replace(/\D/g, '').slice(0, 7);
-      e.target.value = v ? nf(+v) : '';
-      hideErr('itens');
-    });
-    $$('select', row).forEach(sel => sel.addEventListener('change', () => hideErr('itens')));
-    $('.item__rm', row).addEventListener('click', () => { row.remove(); numeraItens(); });
-    if (item) Object.entries(item).forEach(([key, value]) => { const field = $(`[data-f="${key}"]`, row); if (field) field.value = key === 'metros' ? nf(Number(value)) : value; });
-    const refreshPackage = () => {
-      $('[data-package]', row).textContent = packagingText(packagingFor($('[data-f=bitola]', row).value, Number($('[data-f=metros]', row).value.replace(/\D/g, '')), $('[data-f=embalagem]', row).value));
-    };
-    row.addEventListener('input', refreshPackage); row.addEventListener('change', refreshPackage); refreshPackage();
-    itemsEl.appendChild(row);
-    numeraItens();
+  let itemSequence = 0;
+  const checkIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const readItem = row => ({
+    bitola: $('[data-f=bitola]:checked', row)?.value || '',
+    cor: $('[data-f=cor]:checked', row)?.value || '',
+    metros: $('[data-f=metros]', row).value.trim(),
+    quantidade: Number($('[data-f=quantidade]', row).value),
+    embalagem: $('[data-f=embalagem]', row).value,
+  });
+  const metersValue = item => Number(item.metros.replace(/\D/g, ''));
+  const lerItens = () => $$('.item', itemsEl).map(readItem);
+  const itemError = row => {
+    const item = readItem(row);
+    if (!BITOLAS.includes(item.bitola)) return { field: $('[data-f=bitola]', row), message: 'Escolha a bitola deste produto.' };
+    if (!CORES.includes(item.cor)) return { field: $('[data-f=cor]', row), message: 'Escolha a cor deste produto.' };
+    if (!metersValue(item) || metersValue(item) > 9999999) return { field: $('[data-f=metros]', row), message: 'Informe a metragem por unidade, de 1 a 9.999.999 m.' };
+    if (!Number.isInteger(item.quantidade) || item.quantidade < 1 || item.quantidade > 99999) return { field: $('[data-f=quantidade]', row), message: 'Informe uma quantidade inteira, de 1 a 99.999 unidades.' };
+    return null;
   };
-
+  const updateOrderTotal = () => {
+    const items = lerItens();
+    const complete = items.filter((_, index) => !itemError($$('.item', itemsEl)[index]));
+    const units = complete.reduce((sum, i) => sum + i.quantidade, 0);
+    $('#itemsTotal').textContent = `${nf(complete.reduce((sum, i) => sum + metersValue(i) * i.quantidade, 0))} m`;
+    $('#itemsTotalDetails').textContent = complete.length ? `${complete.length} ${complete.length === 1 ? 'produto' : 'produtos'} · ${nf(units)} ${units === 1 ? 'unidade' : 'unidades'}${complete.length < items.length ? ' · Há produto para completar' : ''}` : 'Configure seu primeiro produto acima';
+  };
   const numeraItens = () => {
     const rows = $$('.item', itemsEl);
-    rows.forEach((r, i) => {
-      $('[data-n]', r).textContent = i + 1;
-      $('.item__rm', r).hidden = rows.length === 1;
+    rows.forEach((row, index) => {
+      $('[data-n]', row).textContent = String(index + 1).padStart(2, '0');
+      row.setAttribute('aria-label', `Produto ${index + 1}`);
+      $('.item__rm', row).hidden = rows.length === 1;
+      $('.item__rm', row).setAttribute('aria-label', `Remover produto ${index + 1}`);
+      $$('[data-quantity-step]', row).forEach(button => button.setAttribute('aria-label', `${Number(button.dataset.quantityStep) > 0 ? 'Aumentar' : 'Diminuir'} quantidade do produto ${index + 1}`));
     });
+    updateOrderTotal();
   };
-
-  const lerItens = () => $$('.item', itemsEl).map(r => ({
-    bitola: $('[data-f=bitola]', r).value,
-    metros: $('[data-f=metros]', r).value.trim(),
-    cor:    $('[data-f=cor]', r).value,
-    quantidade: Number($('[data-f=quantidade]', r).value),
-    embalagem: $('[data-f=embalagem]', r).value,
-  }));
-
+  const novoItem = (item = null) => {
+    const uid = ++itemSequence;
+    const row = document.createElement('article');
+    row.className = 'item';
+    row.innerHTML = `
+      <header class="item__head">
+        <div class="item__identity"><span class="item__number" data-n></span><div><strong data-item-title>Cabo fotovoltaico</strong><span class="item__subtitle">Configure seu produto</span></div></div>
+        <button type="button" class="item__rm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5m4-5v5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Remover</span></button>
+      </header>
+      <div class="item__body">
+        <fieldset class="item__options"><legend>Bitola do cabo</legend>
+          <div class="item__gauges">${BITOLAS.map(v => `<label class="item__gauge"><input class="item__radio" type="radio" name="bitola-${uid}" data-f="bitola" value="${v}"><span><b>${v}</b><small>mm²</small></span></label>`).join('')}</div>
+        </fieldset>
+        <fieldset class="item__options"><legend>Cor</legend>
+          <div class="item__colors">${CORES.map(v => `<label class="item__color"><input class="item__radio" type="radio" name="cor-${uid}" data-f="cor" value="${v}" ${v === 'Preto' ? 'checked' : ''}><span><i class="item__swatch" data-color="${v}" aria-hidden="true"></i>${v}${checkIcon}</span></label>`).join('')}</div>
+        </fieldset>
+        <div class="item__measurements">
+          <div class="item__measure"><label class="item__label" for="meters-${uid}">Metros por unidade</label>
+            <div class="item__input-wrap"><input id="meters-${uid}" type="text" data-f="metros" inputmode="numeric" maxlength="9" placeholder="Ex.: 100" aria-describedby="meters-help-${uid}"><span aria-hidden="true">m</span></div>
+            <small class="item__help" id="meters-help-${uid}">Comprimento de cada unidade.</small>
+            <div class="item__presets" role="group" aria-label="Atalhos de metragem">${[50,100,200,500].map(v => `<button type="button" data-meters="${v}" aria-pressed="false">${v} m</button>`).join('')}</div>
+          </div>
+          <div class="item__measure"><label class="item__label" for="quantity-${uid}">Quantidade de unidades</label>
+            <div class="item__stepper"><button type="button" data-quantity-step="-1">−</button><input id="quantity-${uid}" type="number" data-f="quantidade" min="1" max="99999" step="1" value="1" inputmode="numeric" aria-describedby="quantity-help-${uid}"><button type="button" data-quantity-step="1">+</button></div>
+            <small class="item__help" id="quantity-help-${uid}">Quantas unidades desta metragem?</small>
+          </div>
+        </div>
+        <div class="item__packaging" role="status"><span class="item__package-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5Zm-9 5v9l9 5 9-5V8M12 13v9M7.5 5.5l9 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span><div><strong data-package-title>Acondicionamento automático</strong><p data-package-copy>Escolha a bitola e informe a metragem. Nós indicamos a embalagem.</p></div></div>
+        <details class="item__custom"><summary>Precisa de outra embalagem?</summary><label class="wiz__field" for="packaging-${uid}">Sua preferência<select id="packaging-${uid}" data-f="embalagem"><option value="">Usar padrão da fábrica</option><option>Retalho</option><option>Rolo</option><option>Carretel</option><option>Bobina</option></select></label><p class="item__help">Preferências fora do padrão passam pela análise comercial e produtiva.</p></details>
+        <p class="item__error" id="item-error-${uid}" data-item-error role="alert" hidden></p>
+      </div>
+      <footer class="item__footer"><span data-item-summary>Total deste produto</span><strong data-item-total>— m</strong></footer>`;
+    if (item) {
+      $$('[data-f=bitola], [data-f=cor]', row).forEach(input => { input.checked = input.value === String(item[input.dataset.f] || ''); });
+      $('[data-f=metros]', row).value = item.metros ? nf(Number(item.metros)) : '';
+      $('[data-f=quantidade]', row).value = item.quantidade ?? 1;
+      $('[data-f=embalagem]', row).value = item.embalagem || '';
+      $('.item__custom', row).open = Boolean(item.embalagem);
+    }
+    const refresh = () => {
+      const current = readItem(row), meters = metersValue(current);
+      const ready = current.bitola && meters > 0;
+      const pack = packagingFor(current.bitola, meters, current.embalagem);
+      const status = $('.item__packaging', row);
+      status.classList.toggle('is-standard', Boolean(ready && !pack.analise));
+      status.classList.toggle('is-review', Boolean(ready && pack.analise));
+      $('[data-package-title]', row).textContent = !ready ? 'Acondicionamento automático' : pack.analise ? 'Vamos confirmar a embalagem com você' : `${pack.padrao} · padrão da fábrica`;
+      $('[data-package-copy]', row).textContent = !ready ? 'Escolha a bitola e informe a metragem. Nós indicamos a embalagem.' : pack.analise ? `${pack.solicitado ? 'Preferência: ' + pack.solicitado + '. ' : ''}${pack.padrao ? 'Padrão para esta metragem: ' + pack.padrao + '. ' : ''}Sujeito à análise comercial e produtiva, sem garantia de disponibilidade.` : 'Embalagem indicada para esta metragem. Fornecimento sujeito à confirmação da New Cabos.';
+      $('[data-item-title]', row).textContent = current.bitola ? `Cabo fotovoltaico · ${current.bitola} mm²` : 'Cabo fotovoltaico';
+      $('.item__subtitle', row).textContent = current.bitola ? `${current.cor || 'Escolha a cor'} · ${ready ? 'Configuração do pedido' : 'Informe a metragem abaixo'}` : 'Selecione a bitola para começar';
+      const validQuantity = Number.isInteger(current.quantidade) && current.quantidade > 0 && current.quantidade <= 99999;
+      $('[data-item-summary]', row).textContent = meters && validQuantity ? `${nf(current.quantidade)} ${current.quantidade === 1 ? 'unidade' : 'unidades'} × ${nf(meters)} m` : 'Total deste produto';
+      $('[data-item-total]', row).textContent = meters && validQuantity ? `${nf(meters * current.quantidade)} m` : '— m';
+      $$('[data-meters]', row).forEach(button => button.setAttribute('aria-pressed', String(Number(button.dataset.meters) === meters)));
+      const quantity = $('[data-f=quantidade]', row);
+      $('[data-quantity-step="-1"]', row).disabled = Number(quantity.value) <= 1;
+      $('[data-quantity-step="1"]', row).disabled = Number(quantity.value) >= 99999;
+      const message = $('[data-item-error]', row);
+      if (!message.hidden) {
+        const error = itemError(row);
+        row.classList.toggle('is-invalid', Boolean(error)); message.hidden = !error;
+        $$('[aria-invalid]', row).forEach(input => { input.removeAttribute('aria-invalid'); input.removeAttribute('aria-errormessage'); });
+        if (error) {
+          message.textContent = error.message;
+          error.field.setAttribute('aria-invalid', 'true');
+          error.field.setAttribute('aria-errormessage', message.id);
+        }
+      }
+      updateOrderTotal();
+    };
+    $('[data-f=metros]', row).addEventListener('input', e => {
+      const value = e.target.value.replace(/\D/g, '').slice(0, 7);
+      e.target.value = value ? nf(Number(value)) : '';
+    });
+    row.addEventListener('input', () => { hideErr('itens'); refresh(); });
+    row.addEventListener('change', () => { hideErr('itens'); refresh(); });
+    $$('[data-meters]', row).forEach(button => button.addEventListener('click', () => {
+      $('[data-f=metros]', row).value = nf(Number(button.dataset.meters)); hideErr('itens'); refresh();
+    }));
+    $$('[data-quantity-step]', row).forEach(button => button.addEventListener('click', () => {
+      const input = $('[data-f=quantidade]', row), value = Number(input.value);
+      input.value = Math.min(99999, Math.max(1, (Number.isFinite(value) ? Math.floor(value) : 1) + Number(button.dataset.quantityStep)));
+      hideErr('itens'); refresh();
+    }));
+    $('.item__rm', row).addEventListener('click', () => {
+      const next = row.nextElementSibling || row.previousElementSibling;
+      row.remove(); numeraItens(); hideErr('itens');
+      ($('[data-f=bitola]:checked', next) || $('[data-f=bitola]', next))?.focus();
+    });
+    itemsEl.appendChild(row); numeraItens(); refresh();
+    return row;
+  };
   $('#itemAdd').addEventListener('click', () => {
-    novoItem();
-    const rows = $$('.item', itemsEl);
-    $('select', rows[rows.length - 1]).focus();
+    const row = novoItem(); $('[data-f=bitola]', row).focus(); hideErr('itens');
   });
   novoItem();
   $('#orderQuote').addEventListener('click', () => {
     if (!commercialOrder.length) return;
     itemsEl.replaceChildren(); commercialOrder.forEach(item => novoItem(item));
-    go(1, false);
+    go(data.perfil ? 2 : 1, false);
   });
 
   /* --- passo 3: PF/PJ e CNPJ --- */
@@ -492,8 +567,20 @@ const commercialOrder = [];
       if (!data.perfil) { showErr('perfil'); return false; }
     }
     if (s === 2) {
-      const ok = lerItens().every(i => i.bitola && i.cor && +i.metros.replace(/\D/g, '') > 0 && Number.isInteger(i.quantidade) && i.quantidade > 0 && i.quantidade <= 99999);
-      if (!ok) { showErr('itens'); return false; }
+      let firstInvalid = null;
+      $$('.item', itemsEl).forEach(row => {
+        const error = itemError(row);
+        row.classList.toggle('is-invalid', Boolean(error));
+        const message = $('[data-item-error]', row); message.hidden = !error;
+        $$('[aria-invalid]', row).forEach(input => { input.removeAttribute('aria-invalid'); input.removeAttribute('aria-errormessage'); });
+        if (error) {
+          message.textContent = error.message;
+          error.field.setAttribute('aria-invalid', 'true');
+          error.field.setAttribute('aria-errormessage', message.id);
+          firstInvalid ||= error.field;
+        }
+      });
+      if (firstInvalid) { showErr('itens'); firstInvalid.focus(); return false; }
     }
     if (s === 3) {
       let ok = true;
@@ -518,11 +605,20 @@ const commercialOrder = [];
     $('#wizProgress').style.width  = s > 1 ? '100%' : '0';
     $('#wizProgress2').style.width = s > 2 ? '100%' : '0';
     label.textContent = `Passo ${s} de 3 · ${titles[s - 1]}`;
+    dots.forEach(dot => {
+      if (Number(dot.dataset.wizdot) === s) dot.setAttribute('aria-current', 'step');
+      else dot.removeAttribute('aria-current');
+    });
+    btnNext.textContent = s === 2 ? 'Continuar para contato →' : 'Montar meu pedido →';
     btnBack.hidden = s === 1;
     btnNext.hidden = s === 3;
     btnSend.hidden = s !== 3;
     sendErr.hidden = true;
-    if (scroll) form.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+    if (scroll) {
+      const heading = $(`[data-pane="${s}"] > legend`, form);
+      heading.setAttribute('tabindex', '-1'); heading.focus({ preventScroll: true });
+      $('.wiz').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+    }
   };
 
   btnNext.addEventListener('click', () => { if (valida(step)) go(step + 1); });

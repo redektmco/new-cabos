@@ -382,11 +382,11 @@
       <div class="wiz">
         <div class="wiz__bar">
           <div class="wiz__steps">
-            <span class="wiz__dot is-active" data-wizdot="1">1</span>
+            <div class="wiz__step"><span class="wiz__dot is-active" data-wizdot="1" aria-current="step">1</span><span>Perfil</span></div>
             <span class="wiz__line"><i id="wizProgress"></i></span>
-            <span class="wiz__dot" data-wizdot="2">2</span>
+            <div class="wiz__step"><span class="wiz__dot" data-wizdot="2">2</span><span>Pedido</span></div>
             <span class="wiz__line"><i id="wizProgress2"></i></span>
-            <span class="wiz__dot" data-wizdot="3">3</span>
+            <div class="wiz__step"><span class="wiz__dot" data-wizdot="3">3</span><span>Contato</span></div>
           </div>
           <p class="wiz__label" id="wizLabel">Passo 1 de 3 · Quem é você</p>
         </div>
@@ -396,16 +396,16 @@
           <fieldset class="wiz__pane is-active" data-pane="1">
             <legend>O que você faz?</legend>
             <div class="choice-grid" data-choice="perfil">
-              <button type="button" class="choice" data-value="Integrador / Instalador">
+              <button type="button" aria-pressed="false" class="choice" data-value="Integrador / Instalador">
                 <b>Eu instalo</b><span>Compro e monto na obra</span>
               </button>
-              <button type="button" class="choice" data-value="Engenharia / EPC">
+              <button type="button" aria-pressed="false" class="choice" data-value="Engenharia / EPC">
                 <b>Eu faço projeto</b><span>Escolho o que vai ser usado</span>
               </button>
-              <button type="button" class="choice" data-value="Distribuidor / Revenda">
+              <button type="button" aria-pressed="false" class="choice" data-value="Distribuidor / Revenda">
                 <b>Eu revendo</b><span>Vendo pra quem instala</span>
               </button>
-              <button type="button" class="choice" data-value="Outro">
+              <button type="button" aria-pressed="false" class="choice" data-value="Outro">
                 <b>Outro</b><span>Empresa, obra própria, etc.</span>
               </button>
             </div>
@@ -414,12 +414,14 @@
 
           <!-- Passo 2 -->
           <fieldset class="wiz__pane" data-pane="2">
-            <legend>Quais cabos você precisa?</legend>
-            <p class="wiz__q">Informe a bitola, a metragem por unidade, a quantidade, a cor e o acondicionamento de cada produto. <small>(se precisar de mais de um, é só adicionar)</small></p>
+            <legend>Seu pedido, do seu jeito.</legend>
+            <p class="wiz__intro">Escolha o cabo e a quantidade. A embalagem a gente indica para você.</p>
 
             <div class="items" id="items"></div>
-            <button type="button" class="items__add" id="itemAdd">+ Adicionar outro produto</button>
-            <p class="wiz__err" data-err="itens" hidden>Preencha bitola, cor, metragem e quantidade válidas para cada produto.</p>
+            <button type="button" class="items__add" id="itemAdd"><span aria-hidden="true">+</span> Adicionar outro cabo</button>
+            <div class="items-total" role="status"><div class="items-total__label"><span>Total do pedido</span><small id="itemsTotalDetails">Configure seu primeiro produto acima</small></div><strong id="itemsTotal">0 m</strong></div>
+            <p class="wiz__secure">Solicitação de cotação, sem compromisso de compra.</p>
+            <p class="wiz__err" data-err="itens" hidden>Revise os campos destacados para continuar.</p>
           </fieldset>
 
           <!-- Passo 3 -->
@@ -432,8 +434,8 @@
 
             <p class="wiz__q wiz__q--tight">Você compra como:</p>
             <div class="chips" data-choice="pessoa">
-              <button type="button" class="chip-btn" data-value="PF">Pessoa física</button>
-              <button type="button" class="chip-btn" data-value="PJ">Pessoa jurídica</button>
+              <button type="button" aria-pressed="false" class="chip-btn" data-value="PF">Pessoa física</button>
+              <button type="button" aria-pressed="false" class="chip-btn" data-value="PJ">Pessoa jurídica</button>
             </div>
             <p class="wiz__err" data-err="pessoa" hidden>Escolha pessoa física ou jurídica.</p>
 
