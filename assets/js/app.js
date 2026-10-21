@@ -22,26 +22,18 @@ const $$ = (s, c = document) => [...c.querySelectorAll(s)];
 const nf = (n, d = 0) => n.toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/* =========================================================
-   DADOS DE PRODUTO
-   Valores de ampacidade são referências de catálogo para cabo
-   fotovoltaico ao ar livre — confirme com a ficha técnica oficial.
-   ========================================================= */
-const GAUGES = {
-  4:  { amp: 55,  diam: '5,6 mm', peso: '62 g/m',  strands: 56,  viz: 104,
-        uso: 'O mais usado em casa e em comércio pequeno, quando o inversor fica perto das placas.',
-        badge: 'O queridinho das obras em casa' },
-  6:  { amp: 70,  diam: '6,4 mm', peso: '85 g/m',  strands: 84,  viz: 120,
-        uso: 'O mais vendido do Brasil. Serve pra quase toda obra em casa e em comércio.',
-        badge: 'O mais vendido' },
-  10: { amp: 98,  diam: '8,0 mm', peso: '138 g/m', strands: 80,  viz: 142,
-        uso: 'Pra quando o inversor fica longe das placas, ou quando passa bastante energia junta.',
-        badge: 'Pra distância grande' },
-  16: { amp: 132, diam: '9,6 mm', peso: '210 g/m', strands: 126, viz: 164,
-        uso: 'Pra usina e obra industrial, onde passa muita energia de uma vez só.',
-        badge: 'Pra usina e indústria' },
-};
-
+// Regras comerciais fornecidas pela engenharia. Ausência de padrão exige análise.
+function packagingFor(gauge, meters, requested = '') {
+  let standard = '';
+  if ([4, 6].includes(Number(gauge))) {
+    if ([10, 15, 20].includes(meters)) standard = 'Retalho';
+    else if ([25, 50, 100, 200].includes(meters)) standard = 'Rolo';
+    else if (meters > 300 && meters <= 1000) standard = 'Carretel';
+    else if (meters > 1000) standard = 'Bobina';
+  } else if (Number(gauge) === 10 && meters >= 500) standard = 'Bobina';
+  return { padrao: standard, solicitado: requested, analise: !standard || Boolean(requested && requested !== standard) };
+}
+const packagingText = p => `${p.padrao ? 'Padrão da fábrica: ' + p.padrao : 'Sem padrão definido'}${p.solicitado ? ' · Solicitado: ' + p.solicitado : ''}${p.analise ? ' · Sujeito à análise comercial e produtiva, sem garantia de disponibilidade.' : ' · Sujeito à confirmação da NEW CABOS.'}`;
 
 /* =========================================================
    1. HEADER, MENU, PROGRESSO, REVEAL
@@ -140,29 +132,47 @@ const GAUGES = {
 /* =========================================================
    4. CABO DO HERO — troca de bitola
    ========================================================= */
+const commercialOrder = [];
 (function heroCable() {
   const pills = $$('.cable-card__switch .pill');
-  if (!pills.length) return;
-  const stats = $('#heroStats'), label = $('#heroSpecLabel'), print = $('#cablePrint');
-  const core = $('.cable-3d__core'), insul = $('.cable-3d__insul');
-
-  const apply = (g) => {
-    const d = GAUGES[g];
-    label.textContent = `${g} mm²`;
-    print.textContent = `NEW CABOS · ${g}mm² · 1500V · 0001 m`;
-    $('[data-stat=amp]',  stats).textContent = `${d.amp} A`;
-    $('[data-stat=diam]', stats).textContent = d.diam;
-    // espessuras proporcionais à bitola
-    const shrink = { 4: 38, 6: 32, 10: 25, 16: 18 }[g];
-    core.style.inset  = `${shrink}px 0`;
-    insul.style.inset = `${Math.max(shrink - 15, 8)}px 0`;
+  let gauge = '6';
+  const meters = $('#orderMeters'), quantity = $('#orderQuantity'), color = $('#orderColor'), packaging = $('#orderPackaging');
+  const update = () => {
+    $('#heroSpecLabel').textContent = `${gauge} mm²`;
+    $('#cablePrint').textContent = `NEW CABOS · ${gauge}mm² · 1800V · 0001 m`;
+    const shrink = {4:38,6:32,10:25,16:18}[gauge];
+    $('.cable-3d__core').style.inset = `${shrink}px 0`;
+    $('.cable-3d__insul').style.inset = `${Math.max(shrink - 15, 8)}px 0`;
+    $('.cable-3d__jacket').style.background = {Preto:'#171b22',Vermelho:'#b82c32',Verde:'#167547'}[color.value];
+    $('#orderPackage').textContent = packagingText(packagingFor(gauge, Number(meters.value), packaging.value));
+    pills.forEach(p => p.setAttribute('aria-pressed', String(p.dataset.gauge === gauge)));
   };
-
   pills.forEach(p => p.addEventListener('click', () => {
-    pills.forEach(x => x.classList.remove('is-active'));
-    p.classList.add('is-active');
-    apply(p.dataset.gauge);
+    gauge = p.dataset.gauge;
+    pills.forEach(x => x.classList.toggle('is-active', x === p));
+    update();
   }));
+  [meters, color, packaging].forEach(el => el.addEventListener('input', update));
+  const render = () => {
+    const summary = $('#orderSummary'); summary.replaceChildren();
+    commercialOrder.forEach((item, index) => {
+      const row = document.createElement('p');
+      row.textContent = `${item.bitola} mm² · ${item.cor} · ${item.quantidade} × ${nf(Number(item.metros))} m = ${nf(item.quantidade * Number(item.metros))} m. ${packagingText(packagingFor(item.bitola, Number(item.metros), item.embalagem))} `;
+      const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = 'Remover';
+      remove.setAttribute('aria-label', `Remover produto ${index + 1}`);
+      remove.addEventListener('click', () => { commercialOrder.splice(index, 1); render(); });
+      row.append(remove); summary.append(row);
+    });
+    if (commercialOrder.length) {
+      const total = document.createElement('strong'); total.textContent = `Total do pedido: ${nf(commercialOrder.reduce((sum, i) => sum + Number(i.metros) * i.quantidade, 0))} m`; summary.append(total);
+    }
+  };
+  $('#orderBuilder').addEventListener('submit', e => {
+    e.preventDefault();
+    if (!e.target.reportValidity()) return;
+    commercialOrder.push({bitola:gauge, cor:color.value, metros:meters.value, quantidade:Number(quantity.value), embalagem:packaging.value}); render();
+  });
+  update(); render();
 })();
 
 /* =========================================================
@@ -357,7 +367,7 @@ const GAUGES = {
   const itemsEl = $('#items');
   const opts = (arr, fmt) => arr.map(v => `<option value="${v}">${fmt(v)}</option>`).join('');
 
-  const novoItem = () => {
+  const novoItem = (item = null) => {
     const row = document.createElement('div');
     row.className = 'item';
     row.innerHTML = `
@@ -367,13 +377,15 @@ const GAUGES = {
         <label class="wiz__field">Bitola
           <select data-f="bitola"><option value="">Selecione</option>${opts(BITOLAS, v => v + ' mm²')}</select>
         </label>
-        <label class="wiz__field">Metragem
-          <input type="text" data-f="metros" inputmode="numeric" placeholder="Ex.: 2.000 m">
+        <label class="wiz__field">Metragem por unidade (m)
+          <input type="text" data-f="metros" inputmode="numeric" placeholder="Ex.: 100 m">
         </label>
         <label class="wiz__field">Cor
           <select data-f="cor"><option value="">Selecione</option>${opts(CORES, v => v)}</select>
         </label>
-      </div>`;
+        <label class="wiz__field">Quantidade de unidades<input type="number" data-f="quantidade" min="1" max="99999" step="1" value="1" required></label>
+        <label class="wiz__field">Acondicionamento desejado<select data-f="embalagem"><option value="">Padrão da fábrica</option><option>Retalho</option><option>Rolo</option><option>Carretel</option><option>Bobina</option></select></label>
+      </div><p class="wiz__hint" data-package role="status"></p>`;
     $('[data-f=metros]', row).addEventListener('input', (e) => {
       const v = e.target.value.replace(/\D/g, '').slice(0, 7);
       e.target.value = v ? nf(+v) : '';
@@ -381,6 +393,11 @@ const GAUGES = {
     });
     $$('select', row).forEach(sel => sel.addEventListener('change', () => hideErr('itens')));
     $('.item__rm', row).addEventListener('click', () => { row.remove(); numeraItens(); });
+    if (item) Object.entries(item).forEach(([key, value]) => { const field = $(`[data-f="${key}"]`, row); if (field) field.value = key === 'metros' ? nf(Number(value)) : value; });
+    const refreshPackage = () => {
+      $('[data-package]', row).textContent = packagingText(packagingFor($('[data-f=bitola]', row).value, Number($('[data-f=metros]', row).value.replace(/\D/g, '')), $('[data-f=embalagem]', row).value));
+    };
+    row.addEventListener('input', refreshPackage); row.addEventListener('change', refreshPackage); refreshPackage();
     itemsEl.appendChild(row);
     numeraItens();
   };
@@ -397,6 +414,8 @@ const GAUGES = {
     bitola: $('[data-f=bitola]', r).value,
     metros: $('[data-f=metros]', r).value.trim(),
     cor:    $('[data-f=cor]', r).value,
+    quantidade: Number($('[data-f=quantidade]', r).value),
+    embalagem: $('[data-f=embalagem]', r).value,
   }));
 
   $('#itemAdd').addEventListener('click', () => {
@@ -405,6 +424,11 @@ const GAUGES = {
     $('select', rows[rows.length - 1]).focus();
   });
   novoItem();
+  $('#orderQuote').addEventListener('click', () => {
+    if (!commercialOrder.length) return;
+    itemsEl.replaceChildren(); commercialOrder.forEach(item => novoItem(item));
+    go(1, false);
+  });
 
   /* --- passo 3: PF/PJ e CNPJ --- */
   const cnpjBox = $('#cnpjBox'), cnpjIn = $('#wCnpj'), cnpjInfo = $('#cnpjInfo');
@@ -468,7 +492,7 @@ const GAUGES = {
       if (!data.perfil) { showErr('perfil'); return false; }
     }
     if (s === 2) {
-      const ok = lerItens().every(i => i.bitola && i.cor && +i.metros.replace(/\D/g, '') > 0);
+      const ok = lerItens().every(i => i.bitola && i.cor && +i.metros.replace(/\D/g, '') > 0 && Number.isInteger(i.quantidade) && i.quantidade > 0 && i.quantidade <= 99999);
       if (!ok) { showErr('itens'); return false; }
     }
     if (s === 3) {
@@ -476,7 +500,7 @@ const GAUGES = {
       const nome = $('#wNome').value.trim(), fone = $('#wFone').value.trim();
       if (!nome || fone.replace(/\D/g, '').length < 10) { showErr('contato'); ok = false; } else hideErr('contato');
       if (!data.pessoa) { showErr('pessoa'); ok = false; }
-      if (data.pessoa === 'PJ' && limpaCnpj(cnpjIn.value).length !== 14) { showErr('cnpj'); ok = false; }
+      if (data.pessoa === 'PJ' && !cnpjConfere(limpaCnpj(cnpjIn.value))) { showErr('cnpj'); ok = false; }
       if (!ok) return false;
     }
     return true;
@@ -516,7 +540,7 @@ const GAUGES = {
   /* --- monta a mensagem --- */
   const montaMensagem = () => {
     const g = (id) => $(id).value.trim();
-    const itens = lerItens().map(i => `• ${i.bitola} mm² · ${i.cor} · ${i.metros} m`);
+    const itens = lerItens().map(i => `• ${i.bitola} mm² · ${i.cor} · ${i.quantidade} × ${i.metros} m · Total: ${nf(Number(i.metros.replace(/\D/g, '')) * i.quantidade)} m · ${packagingText(packagingFor(i.bitola, Number(i.metros.replace(/\D/g, '')), i.embalagem))}`);
     const pj = data.pessoa === 'PJ';
     const linhas = [
       `*Pedido de cotação — site ${CONFIG.empresa}*`,
@@ -549,7 +573,7 @@ const GAUGES = {
       enviado_em: new Date().toISOString(),
       pagina: location.href,
       perfil: data.perfil,
-      produtos: lerItens().map(i => ({ bitola_mm2: i.bitola, metragem_m: i.metros, cor: i.cor })),
+      produtos: lerItens().map(i => ({ bitola_mm2: i.bitola, metragem_m: i.metros, metragem_por_unidade_m: Number(i.metros.replace(/\D/g, '')), quantidade: i.quantidade, metragem_total_m: Number(i.metros.replace(/\D/g, '')) * i.quantidade, cor: i.cor, acondicionamento: packagingFor(i.bitola, Number(i.metros.replace(/\D/g, '')), i.embalagem) })),
       nome: g('#wNome'),
       tipo_pessoa: pj ? 'PJ' : 'PF',
       cnpj: pj ? g('#wCnpj') : '',
@@ -589,7 +613,8 @@ const GAUGES = {
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    if (!valida(3) || btnSend.disabled) return;
+    if (btnSend.disabled) return;
+    for (const s of [1, 2, 3]) { if (!valida(s)) { go(s); return; } }
     enviar();
   });
 

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>New Cabos — Cabo Solar Direto da Fábrica | Sorocaba-SP</title>
-<meta name="description" content="Fabricamos cabo solar em Sorocaba-SP e fornecemos direto para integradores, instaladores, distribuidores e projetos fotovoltaicos. Seções de 4 a 16 mm², até 1500 V. Solicite uma cotação.">
+<meta name="description" content="Fabricamos cabo solar em Sorocaba-SP e fornecemos direto para integradores, instaladores, distribuidores e projetos fotovoltaicos. Seções de 4 a 16 mm², até 1.800 V. Solicite uma cotação.">
 <meta name="theme-color" content="#F5A11E">
 <link rel="canonical" href="https://lp.newcabos.com.br/">
 
@@ -71,25 +71,23 @@
       <p class="kicker kicker--hero reveal">Cabo solar direto da fábrica</p>
 
       <h1 class="reveal">
-        Cabo solar para empresas de<br>
-        <span class="hl">energia fotovoltaica</span>
+        Cabos fotovoltaicos<br>
+        <span class="hl">diretos da fábrica para o seu projeto!</span>
       </h1>
 
       <p class="hero__sub reveal">
-        Fabricamos cabos para aplicações solares diretamente em nossa fábrica, em Sorocaba-SP.
-        Mais controle sobre a produção, atendimento direto e fornecimento para integradores,
-        instaladores, distribuidores e projetos fotovoltaicos.
+        Mais qualidade, mais economia, mais confiança. Direto da nossa fábrica, em Sorocaba-SP, para a sua empresa. Cabos fotovoltaicos homologados, entrega confiável e competitividade para o seu projeto.
       </p>
 
-      <p class="hero__specs reveal">4, 6, 10 e 16 mm² · até 1500 V</p>
+      <p class="hero__specs reveal">4, 6, 10 e 16 mm² · até 1.800 V</p>
 
       <div class="hero__cta reveal">
         <a class="btn btn--primary btn--lg" href="#orcamento" data-track="hero-primary">
           Solicitar cotação
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
-        <a class="btn btn--outline btn--lg" href="#calculadora" data-track="hero-secondary">
-          Precisa de ajuda para especificar?
+        <a class="btn btn--outline btn--lg" href="#pedido" data-track="hero-secondary">
+          Monte seu Pedido
         </a>
       </div>
 
@@ -107,9 +105,9 @@
 
     <!-- Visual interativo do cabo -->
     <div class="hero__visual reveal">
-      <div class="cable-card">
+      <div class="cable-card" id="pedido">
         <div class="cable-card__head">
-          <span class="cable-card__title">Especificações do cabo</span>
+          <span class="cable-card__title">Monte seu Pedido</span>
           <span class="cable-card__spec" id="heroSpecLabel">6 mm²</span>
         </div>
 
@@ -118,7 +116,7 @@
             <span class="cable-3d__jacket"></span>
             <span class="cable-3d__insul"></span>
             <span class="cable-3d__core"></span>
-            <span class="cable-3d__print" id="cablePrint">NEW CABOS · 6mm² · 1500V · 0001 m</span>
+            <span class="cable-3d__print" id="cablePrint">NEW CABOS · 6mm² · 1800V · 0001 m</span>
           </div>
           <div class="cable-3d__current" aria-hidden="true"><i></i><i></i><i></i></div>
         </div>
@@ -130,11 +128,19 @@
           <button class="pill" data-gauge="16">16 mm²</button>
         </div>
 
-        <dl class="cable-card__stats" id="heroStats">
-          <div><dt>Corrente admissível</dt><dd data-stat="amp">70 A</dd></div>
-          <div><dt>Diâmetro externo</dt><dd data-stat="diam">6,4 mm</dd></div>
-          <div><dt>Tensão nominal</dt><dd data-stat="volt">1500 V</dd></div>
-        </dl>
+        <form id="orderBuilder" class="order-builder">
+          <div class="order-builder__fields">
+            <label>Cor<select id="orderColor"><option>Preto</option><option>Vermelho</option><option>Verde</option></select></label>
+            <label>Metragem por unidade (m)<input id="orderMeters" type="number" min="1" max="9999999" step="1" value="100" required></label>
+            <label>Quantidade de unidades<input id="orderQuantity" type="number" min="1" max="99999" step="1" value="1" required></label>
+            <label>Acondicionamento desejado<select id="orderPackaging"><option value="">Padrão da fábrica</option><option>Retalho</option><option>Rolo</option><option>Carretel</option><option>Bobina</option></select></label>
+          </div>
+          <p id="orderPackage" role="status"></p>
+          <button class="btn btn--primary btn--block" type="submit">Adicionar ao pedido</button>
+        </form>
+        <div class="order-summary" id="orderSummary" aria-live="polite"></div>
+        <a class="btn btn--outline btn--block" href="#orcamento" id="orderQuote">Levar pedido para cotação</a>
+        <p class="order-note">A escolha da bitola e da metragem é de responsabilidade do cliente e deve observar o projeto elétrico elaborado por profissional legalmente habilitado. Este configurador é exclusivamente comercial: não realiza dimensionamento elétrico ou validação técnica da instalação. Acondicionamento e fornecimento sujeitos à confirmação da NEW CABOS.</p>
       </div>
     </div>
   </div>
@@ -168,19 +174,19 @@
       <article class="pain reveal">
         <span class="pain__num">2</span>
         <h3>Especificações para aplicações fotovoltaicas</h3>
-        <p>Cabos disponíveis em 4, 6, 10 e 16 mm², com especificações adequadas às necessidades de projetos de energia solar.</p>
+        <p>Cabos disponíveis em 4, 6, 10 e 16 mm², para tensões de até 1,8 kV, específicos para aplicações fotovoltaicas.</p>
       </article>
 
       <article class="pain reveal">
         <span class="pain__num">3</span>
-        <h3>Rastreabilidade e controle</h3>
+        <h3>Gravação metro a metro</h3>
         <p>A identificação da metragem facilita a conferência dos rolos e o controle do material durante a instalação.</p>
       </article>
 
       <article class="pain reveal">
         <span class="pain__num">4</span>
         <h3>Atendimento direto</h3>
-        <p>Você fala com quem conhece o produto e pode ajudar na especificação, cotação e fornecimento do material para sua obra.</p>
+        <p>Consulte nossos especialistas e tire suas dúvidas sobre os nossos produtos, a cotação e o fornecimento.</p>
       </article>
 
       <article class="pain reveal">
@@ -188,6 +194,7 @@
         <h3>Fornecimento para empresas</h3>
         <p>Atendemos desde pedidos pontuais até demandas recorrentes de integradores, instaladores e distribuidores.</p>
       </article>
+      <article class="pain reveal"><span class="pain__num">6</span><h3>Normatizados</h3><p>Fabricados e homologados conforme a norma ABNT NBR 16612, com laudos de qualidade e garantia de fabricação.</p></article>
     </div>
 
     <div class="factory reveal">
@@ -241,7 +248,7 @@
           <rect class="c-jacket" x="-20" y="14" width="124" height="36" rx="18"/>
           <rect class="c-shine" x="2" y="19" width="94" height="5" rx="2.5"/>
           <path class="c-flow" d="M-20 32H102"/>
-          <text class="c-print" x="8" y="40">NEW CABOS · 6mm² · 1500V</text>
+          <text class="c-print" x="8" y="40">NEW CABOS · 6mm² · 1800V</text>
           <rect class="c-conn" x="100" y="10" width="44" height="44" rx="8"/>
           <path class="c-ridge" d="M110 12v40M119 12v40M128 12v40"/>
           <rect class="c-pin" x="144" y="24" width="22" height="16" rx="3"/>
@@ -325,12 +332,12 @@
           <thead><tr><th scope="col">Característica</th><th scope="col">New Cabos</th><th scope="col">Cabo genérico</th></tr></thead>
           <tbody>
             <tr><th scope="row">Seção do cabo</th><td>4, 6, 10 e 16 mm²</td><td>Varia conforme o fabricante</td></tr>
-            <tr><th scope="row">Tensão nominal</th><td>Até 1500 V</td><td>Nem sempre informada</td></tr>
+            <tr><th scope="row">Tensão nominal</th><td>Até 1.800 V</td><td>Nem sempre informada</td></tr>
             <tr><th scope="row">Resistência UV</th><td>Capa dupla para uso ao ar livre</td><td>Cabo comum não possui resistência UV</td></tr>
             <tr><th scope="row">Condutor</th><td>Cobre puro com banho de estanho</td><td>Varia conforme o fabricante</td></tr>
             <tr><th scope="row">Identificação de metragem</th><td>Numeração de metro em metro</td><td>Nem sempre há marcação</td></tr>
-            <tr><th scope="row">Conformidade e documentação</th><td>Testado, com laudo para o projeto</td><td>Nem sempre disponível</td></tr>
-            <tr><th scope="row">Em caso de fogo</th><td>Baixa emissão de fumaça</td><td>Varia conforme o material</td></tr>
+            <tr><th scope="row">Conformidade e documentação</th><td>100% testados, com laudo técnico e garantia de fabricação</td><td>Nem sempre disponível</td></tr>
+            <tr><th scope="row">Em caso de fogo</th><td>Antichama</td><td>Varia conforme o material</td></tr>
           </tbody>
         </table>
       </div>
@@ -408,11 +415,11 @@
           <!-- Passo 2 -->
           <fieldset class="wiz__pane" data-pane="2">
             <legend>Quais cabos você precisa?</legend>
-            <p class="wiz__q">Informe a bitola, a metragem e a cor de cada produto. <small>(se precisar de mais de um, é só adicionar)</small></p>
+            <p class="wiz__q">Informe a bitola, a metragem por unidade, a quantidade, a cor e o acondicionamento de cada produto. <small>(se precisar de mais de um, é só adicionar)</small></p>
 
             <div class="items" id="items"></div>
             <button type="button" class="items__add" id="itemAdd">+ Adicionar outro produto</button>
-            <p class="wiz__err" data-err="itens" hidden>Preencha bitola, metragem e cor de cada produto.</p>
+            <p class="wiz__err" data-err="itens" hidden>Preencha bitola, cor, metragem e quantidade válidas para cada produto.</p>
           </fieldset>
 
           <!-- Passo 3 -->
@@ -435,7 +442,7 @@
                 <input type="text" id="wCnpj" name="cnpj" inputmode="text" autocomplete="off" maxlength="18" placeholder="00.000.000/0000-00">
               </label>
               <p class="wiz__hint" id="cnpjInfo" hidden></p>
-              <p class="wiz__err" data-err="cnpj" hidden>Confira o CNPJ: ele precisa ter 14 caracteres.</p>
+              <p class="wiz__err" data-err="cnpj" hidden>Confira o CNPJ informado.</p>
             </div>
 
             <label class="wiz__field" for="wFone">Telefone*

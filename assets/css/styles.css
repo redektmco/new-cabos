@@ -665,3 +665,17 @@ select option{background:#fff;color:var(--txt)}
 .uv-vs__card--bad li svg{background:var(--bad)}
 .uv-vs__card--ok li svg{background:var(--good)}
 @media (max-width:680px){ .uv-vs{grid-template-columns:1fr} }
+
+/* Configurador comercial */
+#pedido{scroll-margin-top:100px}
+.order-builder{position:relative}
+.order-builder__fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.order-builder label{display:flex;flex-direction:column;gap:6px;font-size:.8rem;color:var(--dark-txt)}
+.order-builder input,.order-builder select{width:100%;min-width:0;padding:10px;border:1px solid #52657c;border-radius:8px;background:#10233d;color:#fff;font:inherit}
+.order-builder option{background:#10233d}
+#orderPackage,.order-note,.order-summary{font-size:.78rem;line-height:1.6;color:#c8d3e0;margin:16px 0}
+.order-summary p{padding:12px 0;border-bottom:1px solid #52657c}
+.order-summary button{background:none;color:#ffd084;border:0;text-decoration:underline;cursor:pointer}
+.order-note{font-size:.7rem}
+.order-builder .btn{margin-top:12px}
+@media(max-width:400px){.order-builder__fields{grid-template-columns:1fr}}
