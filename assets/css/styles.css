@@ -794,7 +794,7 @@ select option{background:#fff;color:var(--txt)}
 /* Revisão do briefing de 22/10: escolhas sempre visíveis e leitura uniforme. */
 .hero__sub,.hero__micro,.sec__lead,.pain>p:not(.pain__tagline),.factory__copy>p,.brand-strip p,
 .quote-box__aside>p,.tl__txt,.tl__note,.order-note,.wiz__intro,.wiz__privacy,.wiz__done>p{
-  text-align:justify;hyphens:auto;overflow-wrap:break-word;text-justify:inter-word;
+  text-align:justify;hyphens:none;word-break:normal;overflow-wrap:normal;text-justify:inter-word;
 }
 .packaging-options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .packaging-choice{position:relative;min-width:0;cursor:pointer}
