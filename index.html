@@ -130,10 +130,14 @@
 
         <form id="orderBuilder" class="order-builder">
           <div class="order-builder__fields">
-            <label>Cor<select id="orderColor"><option>Preto</option><option>Vermelho</option><option>Verde</option></select></label>
+            <fieldset class="order-builder__choice order-builder__choice--wide" id="orderColor"><legend>Cor do cabo</legend><div class="order-builder__colors">
+              <label><input class="item__radio" type="radio" name="hero-color" value="Preto" checked><span><i class="item__swatch" data-color="Preto" aria-hidden="true"></i>Preto</span></label>
+              <label><input class="item__radio" type="radio" name="hero-color" value="Vermelho"><span><i class="item__swatch" data-color="Vermelho" aria-hidden="true"></i>Vermelho</span></label>
+              <label><input class="item__radio" type="radio" name="hero-color" value="Verde"><span><i class="item__swatch" data-color="Verde" aria-hidden="true"></i>Verde</span></label>
+            </div></fieldset>
             <label>Metragem por unidade (m)<input id="orderMeters" type="number" min="1" max="9999999" step="1" value="100" required></label>
             <label>Quantidade de unidades<input id="orderQuantity" type="number" min="1" max="99999" step="1" value="1" required></label>
-            <label>Acondicionamento desejado<select id="orderPackaging"><option value="">Padrão da fábrica</option><option>Retalho</option><option>Rolo</option><option>Carretel</option><option>Bobina</option></select></label>
+            <fieldset class="order-builder__choice order-builder__choice--wide" id="orderPackaging"><legend>Acondicionamento desejado</legend><div class="packaging-options" id="heroPackagingOptions"></div></fieldset>
           </div>
           <p id="orderPackage" role="status"></p>
           <button class="btn btn--primary btn--block" type="submit">Adicionar ao pedido</button>
@@ -165,36 +169,12 @@
     </header>
 
     <div class="pain-grid">
-      <article class="pain reveal">
-        <span class="pain__num">1</span>
-        <h3>Fabricação própria</h3>
-        <p>Produzimos nossos cabos em Sorocaba-SP, acompanhando o processo de fabricação e mantendo controle sobre a qualidade do produto.</p>
-      </article>
-
-      <article class="pain reveal">
-        <span class="pain__num">2</span>
-        <h3>Especificações para aplicações fotovoltaicas</h3>
-        <p>Cabos disponíveis em 4, 6, 10 e 16 mm², para tensões de até 1,8 kV, específicos para aplicações fotovoltaicas.</p>
-      </article>
-
-      <article class="pain reveal">
-        <span class="pain__num">3</span>
-        <h3>Gravação metro a metro</h3>
-        <p>A identificação da metragem facilita a conferência dos rolos e o controle do material durante a instalação.</p>
-      </article>
-
-      <article class="pain reveal">
-        <span class="pain__num">4</span>
-        <h3>Atendimento direto</h3>
-        <p>Consulte nossos especialistas e tire suas dúvidas sobre os nossos produtos, a cotação e o fornecimento.</p>
-      </article>
-
-      <article class="pain reveal">
-        <span class="pain__num">5</span>
-        <h3>Fornecimento para empresas</h3>
-        <p>Atendemos desde pedidos pontuais até demandas recorrentes de integradores, instaladores e distribuidores.</p>
-      </article>
-      <article class="pain reveal"><span class="pain__num">6</span><h3>Normatizados</h3><p>Fabricados e homologados conforme a norma ABNT NBR 16612, com laudos de qualidade e garantia de fabricação.</p></article>
+      <article class="pain reveal"><span class="pain__num">01</span><h3>Fabricação própria</h3><p>Produzidos em nossa planta, em Sorocaba-SP, sob rígido controle de qualidade, com equipamentos de alta eficiência e confiabilidade.</p><p class="pain__tagline"><strong>Quem faz, garante!</strong></p></article>
+      <article class="pain reveal"><span class="pain__num">02</span><h3>Específicos para aplicações fotovoltaicas</h3><p>Disponíveis nas seções de 4, 6, 10 e 16 mm², para tensões de até 1,8 kV, garantindo a máxima performance do seu projeto.</p><p class="pain__tagline"><strong>Quem sabe, faz!</strong></p></article>
+      <article class="pain reveal"><span class="pain__num">03</span><h3>Gravação metro a metro</h3><p>A gravação da metragem nos cabos facilita o controle do seu estoque e a instalação do seu produto.</p><p class="pain__tagline"><strong>Quem entende, facilita!</strong></p></article>
+      <article class="pain reveal"><span class="pain__num">04</span><h3>Atendimento direto</h3><p>Consulte nossos especialistas! Tire suas dúvidas sobre os nossos produtos.</p><p class="pain__tagline"><strong>Quem conhece, ajuda!</strong></p></article>
+      <article class="pain reveal"><span class="pain__num">05</span><h3>Fornecimento especializado</h3><p>Atendemos desde pedidos pequenos e pontuais até grandes demandas recorrentes, com rapidez e segurança.</p><p class="pain__tagline"><strong>Quem produz, entrega!</strong></p></article>
+      <article class="pain reveal"><span class="pain__num">06</span><h3>Normatizados</h3><p>Fabricados e homologados conforme a norma ABNT NBR 16612.</p><p class="pain__tagline"><strong>Quem garante, certifica!</strong></p></article>
     </div>
 
     <div class="factory reveal">
@@ -308,20 +288,20 @@
       <p class="tl__note">Comparativo ilustrativo entre cabo solar e cabo genérico sem certificação. O desempenho real depende da instalação e do local.</p>
 
       <div class="uv-vs reveal">
+        <div class="uv-vs__card uv-vs__card--ok">
+          <h3>Cabo New Cabos com proteção UV</h3>
+          <ul>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Desenvolvido para exposição solar</li>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Maior resistência às intempéries</li>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Mais durabilidade e confiabilidade ao longo do tempo</li>
+          </ul>
+        </div>
         <div class="uv-vs__card uv-vs__card--bad">
           <h3>Cabo comum</h3>
           <ul>
             <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg> Sem proteção UV adequada</li>
             <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg> Maior exposição à degradação causada pelo sol</li>
             <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg> Pode comprometer a durabilidade da instalação</li>
-          </ul>
-        </div>
-        <div class="uv-vs__card uv-vs__card--ok">
-          <h3>Cabo com proteção UV</h3>
-          <ul>
-            <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Desenvolvido para exposição solar</li>
-            <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Maior resistência às intempéries</li>
-            <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Mais durabilidade e confiabilidade ao longo do tempo</li>
           </ul>
         </div>
       </div>
@@ -396,17 +376,17 @@
           <fieldset class="wiz__pane is-active" data-pane="1">
             <legend>O que você faz?</legend>
             <div class="choice-grid" data-choice="perfil">
-              <button type="button" aria-pressed="false" class="choice" data-value="Integrador / Instalador">
-                <b>Eu instalo</b><span>Compro e monto na obra</span>
+              <button type="button" aria-pressed="false" class="choice" data-value="Consumidor final">
+                <b>Consumidor final</b>
               </button>
-              <button type="button" aria-pressed="false" class="choice" data-value="Engenharia / EPC">
-                <b>Eu faço projeto</b><span>Escolho o que vai ser usado</span>
+              <button type="button" aria-pressed="false" class="choice" data-value="Integrador">
+                <b>Integrador</b>
               </button>
-              <button type="button" aria-pressed="false" class="choice" data-value="Distribuidor / Revenda">
-                <b>Eu revendo</b><span>Vendo pra quem instala</span>
+              <button type="button" aria-pressed="false" class="choice" data-value="Revenda">
+                <b>Revenda</b>
               </button>
-              <button type="button" aria-pressed="false" class="choice" data-value="Outro">
-                <b>Outro</b><span>Empresa, obra própria, etc.</span>
+              <button type="button" aria-pressed="false" class="choice" data-value="Outros">
+                <b>Outros</b>
               </button>
             </div>
             <p class="wiz__err" data-err="perfil" hidden>Escolha uma opção pra continuar.</p>
@@ -450,12 +430,15 @@
             <label class="wiz__field" for="wFone">Telefone*
               <input type="tel" id="wFone" name="fone" autocomplete="tel" required placeholder="(00) 00000-0000">
             </label>
-            <label class="wiz__field" for="wEmail">E-mail
-              <input type="email" id="wEmail" name="email" autocomplete="email" placeholder="voce@empresa.com.br">
+            <label class="wiz__field" for="wEmail">E-mail*
+              <input type="email" id="wEmail" name="email" autocomplete="email" required aria-describedby="emailErr" placeholder="voce@empresa.com.br">
             </label>
+            <p class="wiz__err" id="emailErr" data-err="email" role="alert" hidden>Informe um e-mail válido para receber a cotação.</p>
             <label class="wiz__field" for="wMsg">Sobre a obra ou o pedido
-              <textarea id="wMsg" name="msg" rows="3" placeholder="Prazo, local da entrega, tipo de projeto, o que for útil. Ou deixe em branco mesmo."></textarea>
+              <textarea id="wMsg" name="msg" rows="3" maxlength="1000" aria-describedby="messageLimit" placeholder="Prazo, local da entrega, tipo de projeto, o que for útil. Ou deixe em branco mesmo."></textarea>
             </label>
+            <p class="wiz__counter" id="messageLimit"><span id="messageCount">0</span> / 1.000 caracteres</p>
+            <p class="wiz__err" data-err="mensagem" hidden>Escreva até 1.000 caracteres.</p>
             <p class="wiz__err" data-err="contato" hidden>Precisamos do seu nome e do telefone para te responder.</p>
             <p class="wiz__privacy">Seus dados são só para te responder. Não enviamos spam.</p>
           </fieldset>

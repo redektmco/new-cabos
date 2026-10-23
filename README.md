@@ -46,7 +46,7 @@ Regras de acondicionamento fornecidas pela engenharia:
 
 Demais metragens, todos os pedidos de 16 mm² e sugestões de embalagem diferentes do padrão exigem análise comercial e produtiva, sem promessa de disponibilidade. Todo fornecimento está sujeito à confirmação da NEW CABOS. A escolha da bitola e metragem deve observar o projeto de profissional legalmente habilitado.
 
-O formulário mantém telefone obrigatório e CNPJ para pessoa jurídica. Cada produto enviado inclui quantidade, metragem por unidade, metragem total e acondicionamento (padrão, solicitado e indicador de análise). O campo legado `metragem_m` continua representando a metragem por unidade em formato brasileiro.
+O formulário exige nome, telefone e e-mail válido, além de CNPJ para pessoa jurídica. A mensagem admite até 1.000 caracteres e mostra um contador. Os perfis comerciais são Consumidor final, Integrador, Revenda e Outros. Cores e acondicionamentos (Retalho, Rolo, Carretel e Bobina) são opções visíveis nos dois configuradores, sem depender de menus nativos ou hover. Cada produto enviado inclui quantidade, metragem por unidade, metragem total e acondicionamento (padrão, solicitado e indicador de análise). O campo legado `metragem_m` continua representando a metragem por unidade em formato brasileiro.
 
 ## Como o formulário envia
 
@@ -61,8 +61,9 @@ Campos enviados: `origem`, `enviado_em`, `pagina`, `perfil`, `produtos`
 `razao_social`, `cidade`, `telefone`, `email`, `mensagem`, `resumo` (texto
 pronto) e, se vierem na URL, `utm_*`, `gclid` e `fbclid`.
 
-No n8n, o nó Webhook precisa aceitar POST e responder 200; se responder erro,
-o visitante vê a mensagem de erro.
+O destino solicitado para os leads é **contato@newcabos.com.br**, por e-mail. O site estático não envia e-mails diretamente: é necessário configurar o fluxo n8n para receber o JSON e enviar o conteúdo de `resumo`, incluindo os dados do cliente e dos produtos, para esse endereço fixo. O endereço do cliente (`email`) deve ser usado como Reply-To. Não é necessário gravar os leads em planilha.
+
+O nó Webhook deve aceitar POST e responder com sucesso somente após o envio de e-mail ser aceito pelo provedor. Configure as credenciais de e-mail exclusivamente no n8n, nunca no JavaScript público. Em caso de erro, o visitante deve receber a mensagem de falha. **O webhook permanece vazio no repositório; a entrega real por e-mail ainda depende dessa configuração externa.**
 
 ---
 

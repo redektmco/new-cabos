@@ -35,6 +35,16 @@ function packagingFor(gauge, meters, requested = '') {
 }
 const packagingText = p => `${p.padrao ? 'Padrão da fábrica: ' + p.padrao : 'Sem padrão definido'}${p.solicitado ? ' · Solicitado: ' + p.solicitado : ''}${p.analise ? ' · Sujeito à análise comercial e produtiva, sem garantia de disponibilidade.' : ' · Sujeito à confirmação da NEW CABOS.'}`;
 
+const PACKAGING_ICONS = {
+  Retalho: '<path d="M4 15c0-5 5-8 8-5s8 0 8-4M4 15c0 5 5 6 8 2s8-1 8 4"/>',
+  Rolo: '<ellipse cx="12" cy="8" rx="8" ry="4"/><path d="M4 8v7c0 5 16 5 16 0V8M4 12c0 5 16 5 16 0"/><ellipse cx="12" cy="8" rx="3" ry="1.5"/>',
+  Carretel: '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M6 7v10m12-10v10M4 18c0 5 16 5 16 0M6 10h12M6 13h12M6 16h12"/>',
+  Bobina: '<ellipse cx="6" cy="12" rx="4" ry="9"/><ellipse cx="6" cy="12" rx="1" ry="2"/><path d="M6 3h12c5 0 5 18 0 18H6m4-15h8m-8 3h10m-10 6h10m-10 3h8"/>',
+};
+const packagingChoices = name => `
+  <label class="packaging-choice packaging-choice--auto"><input class="item__radio" type="radio" name="${name}" data-f="embalagem" value="" checked><span>Indicar automaticamente <small>Conforme a bitola e a metragem</small></span></label>
+  ${Object.entries(PACKAGING_ICONS).map(([label, icon]) => `<label class="packaging-choice"><input class="item__radio" type="radio" name="${name}" data-f="embalagem" value="${label}"><span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${icon}</svg><b>${label}</b></span></label>`).join('')}`;
+
 /* =========================================================
    1. HEADER, MENU, PROGRESSO, REVEAL
    ========================================================= */
@@ -136,15 +146,18 @@ const commercialOrder = [];
 (function heroCable() {
   const pills = $$('.cable-card__switch .pill');
   let gauge = '6';
+  $('#heroPackagingOptions').innerHTML = packagingChoices('hero-packaging');
   const meters = $('#orderMeters'), quantity = $('#orderQuantity'), color = $('#orderColor'), packaging = $('#orderPackaging');
+  const selectedColor = () => $('input:checked', color).value;
+  const selectedPackaging = () => $('input:checked', packaging).value;
   const update = () => {
     $('#heroSpecLabel').textContent = `${gauge} mm²`;
     $('#cablePrint').textContent = `NEW CABOS · ${gauge}mm² · 1800V · 0001 m`;
     const shrink = {4:38,6:32,10:25,16:18}[gauge];
     $('.cable-3d__core').style.inset = `${shrink}px 0`;
     $('.cable-3d__insul').style.inset = `${Math.max(shrink - 15, 8)}px 0`;
-    $('.cable-3d__jacket').style.background = {Preto:'#171b22',Vermelho:'#b82c32',Verde:'#167547'}[color.value];
-    $('#orderPackage').textContent = packagingText(packagingFor(gauge, Number(meters.value), packaging.value));
+    $('.cable-3d__jacket').style.background = {Preto:'#171b22',Vermelho:'#b82c32',Verde:'#167547'}[selectedColor()];
+    $('#orderPackage').textContent = packagingText(packagingFor(gauge, Number(meters.value), selectedPackaging()));
     pills.forEach(p => p.setAttribute('aria-pressed', String(p.dataset.gauge === gauge)));
   };
   pills.forEach(p => p.addEventListener('click', () => {
@@ -170,7 +183,7 @@ const commercialOrder = [];
   $('#orderBuilder').addEventListener('submit', e => {
     e.preventDefault();
     if (!e.target.reportValidity()) return;
-    commercialOrder.push({bitola:gauge, cor:color.value, metros:meters.value, quantidade:Number(quantity.value), embalagem:packaging.value}); render();
+    commercialOrder.push({bitola:gauge, cor:selectedColor(), metros:meters.value, quantidade:Number(quantity.value), embalagem:selectedPackaging()}); render();
   });
   update(); render();
 })();
@@ -373,7 +386,7 @@ const commercialOrder = [];
     cor: $('[data-f=cor]:checked', row)?.value || '',
     metros: $('[data-f=metros]', row).value.trim(),
     quantidade: Number($('[data-f=quantidade]', row).value),
-    embalagem: $('[data-f=embalagem]', row).value,
+    embalagem: $('[data-f=embalagem]:checked', row)?.value || '',
   });
   const metersValue = item => Number(item.metros.replace(/\D/g, ''));
   const lerItens = () => $$('.item', itemsEl).map(readItem);
@@ -419,10 +432,11 @@ const commercialOrder = [];
         <fieldset class="item__options"><legend>Cor</legend>
           <div class="item__colors">${CORES.map(v => `<label class="item__color"><input class="item__radio" type="radio" name="cor-${uid}" data-f="cor" value="${v}" ${v === 'Preto' ? 'checked' : ''}><span><i class="item__swatch" data-color="${v}" aria-hidden="true"></i>${v}${checkIcon}</span></label>`).join('')}</div>
         </fieldset>
+        <fieldset class="item__options"><legend>Acondicionamento desejado</legend><div class="packaging-options">${packagingChoices(`packaging-${uid}`)}</div></fieldset>
         <div class="item__measurements">
           <div class="item__measure"><label class="item__label" for="meters-${uid}">Metros por unidade</label>
             <div class="item__input-wrap"><input id="meters-${uid}" type="text" data-f="metros" inputmode="numeric" maxlength="9" placeholder="Ex.: 100" aria-describedby="meters-help-${uid}"><span aria-hidden="true">m</span></div>
-            <small class="item__help" id="meters-help-${uid}">Comprimento de cada unidade.</small>
+            <small class="item__help" id="meters-help-${uid}">Metragem de cada retalho, rolo, carretel ou bobina.</small>
             <div class="item__presets" role="group" aria-label="Atalhos de metragem">${[50,100,200,500].map(v => `<button type="button" data-meters="${v}" aria-pressed="false">${v} m</button>`).join('')}</div>
           </div>
           <div class="item__measure"><label class="item__label" for="quantity-${uid}">Quantidade de unidades</label>
@@ -431,7 +445,7 @@ const commercialOrder = [];
           </div>
         </div>
         <div class="item__packaging" role="status"><span class="item__package-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5Zm-9 5v9l9 5 9-5V8M12 13v9M7.5 5.5l9 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span><div><strong data-package-title>Acondicionamento automático</strong><p data-package-copy>Escolha a bitola e informe a metragem. Nós indicamos a embalagem.</p></div></div>
-        <details class="item__custom"><summary>Precisa de outra embalagem?</summary><label class="wiz__field" for="packaging-${uid}">Sua preferência<select id="packaging-${uid}" data-f="embalagem"><option value="">Usar padrão da fábrica</option><option>Retalho</option><option>Rolo</option><option>Carretel</option><option>Bobina</option></select></label><p class="item__help">Preferências fora do padrão passam pela análise comercial e produtiva.</p></details>
+
         <p class="item__error" id="item-error-${uid}" data-item-error role="alert" hidden></p>
       </div>
       <footer class="item__footer"><span data-item-summary>Total deste produto</span><strong data-item-total>— m</strong></footer>`;
@@ -439,8 +453,7 @@ const commercialOrder = [];
       $$('[data-f=bitola], [data-f=cor]', row).forEach(input => { input.checked = input.value === String(item[input.dataset.f] || ''); });
       $('[data-f=metros]', row).value = item.metros ? nf(Number(item.metros)) : '';
       $('[data-f=quantidade]', row).value = item.quantidade ?? 1;
-      $('[data-f=embalagem]', row).value = item.embalagem || '';
-      $('.item__custom', row).open = Boolean(item.embalagem);
+      $$('[data-f=embalagem]', row).forEach(input => { input.checked = input.value === (item.embalagem || ''); });
     }
     const refresh = () => {
       const current = readItem(row), meters = metersValue(current);
@@ -586,9 +599,21 @@ const commercialOrder = [];
       let ok = true;
       const nome = $('#wNome').value.trim(), fone = $('#wFone').value.trim();
       if (!nome || fone.replace(/\D/g, '').length < 10) { showErr('contato'); ok = false; } else hideErr('contato');
+      const email = $('#wEmail');
+      email.value = email.value.trim();
+      if (!email.checkValidity()) { showErr('email'); email.setAttribute('aria-invalid', 'true'); ok = false; }
+      else { hideErr('email'); email.removeAttribute('aria-invalid'); }
+      if ($('#wMsg').value.length > $('#wMsg').maxLength) { showErr('mensagem'); ok = false; } else hideErr('mensagem');
       if (!data.pessoa) { showErr('pessoa'); ok = false; }
       if (data.pessoa === 'PJ' && !cnpjConfere(limpaCnpj(cnpjIn.value))) { showErr('cnpj'); ok = false; }
-      if (!ok) return false;
+      if (!ok) {
+        if (step === 3) {
+          if (!nome) $('#wNome').focus();
+          else if (fone.replace(/\D/g, '').length < 10) $('#wFone').focus();
+          else if (!email.checkValidity()) email.focus();
+        }
+        return false;
+      }
     }
     return true;
   };
@@ -631,6 +656,15 @@ const commercialOrder = [];
     else if (v.length > 2) v = `(${v.slice(0, 2)}) ${v.slice(2)}`;
     else if (v.length > 0) v = `(${v}`;
     e.target.value = v;
+  });
+
+  const messageInput = $('#wMsg');
+  messageInput.addEventListener('input', () => {
+    $('#messageCount').textContent = nf(messageInput.value.length);
+    hideErr('mensagem');
+  });
+  $('#wEmail').addEventListener('input', e => {
+    hideErr('email'); e.target.removeAttribute('aria-invalid');
   });
 
   /* --- monta a mensagem --- */
@@ -710,7 +744,7 @@ const commercialOrder = [];
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     if (btnSend.disabled) return;
-    for (const s of [1, 2, 3]) { if (!valida(s)) { go(s); return; } }
+    for (const s of [1, 2, 3]) { if (!valida(s)) { if (step !== s) go(s); return; } }
     enviar();
   });
 
