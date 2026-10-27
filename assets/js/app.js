@@ -8,7 +8,7 @@
    ========================================================= */
 const CONFIG = {
   // Cole aqui a URL de produção do webhook do n8n (nó Webhook, método POST)
-  webhook: '',
+  webhook: 'https://n8n-production-470e.up.railway.app/webhook/4dbbc067-a8fc-4aa9-a3a9-6892b5b4a22c',
   // Dados reais, extraídos da LP oficial (lp.newcabos.com.br)
   telefone: '+5515997556534',
   telefoneLabel: '(15) 99755-6534',
