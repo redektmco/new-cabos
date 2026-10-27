@@ -1,0 +1,330 @@
+{
+  "name": "LP New Cabos — Leads do formulário",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Leads da LP New Cabos → e-mail + planilha\nO formulário de **lp.newcabos.com.br** envia cada pedido de cotação para este fluxo.\n\n**1. Envia e-mail** · abra o nó e crie a credencial **SMTP** da conta que vai enviar (servidor, porta, usuário e senha). Troque o campo **From Email** para o endereço dessa conta.\n\n**2. Grava na planilha** · conecte a conta Google e escolha a planilha e a aba. A linha 1 da aba precisa ter os cabeçalhos do arquivo `n8n/cabecalho-planilha.csv`.\n\n**3.** Salve e **ative** o fluxo (botão Active / Publish, no topo).\n\n**4.** Abra o nó **Webhook**, copie a **Production URL** e envie para a agência colocar no site.\n\nPara testar, mande um pedido pelo site depois do passo 4 e confira em **Executions**.",
+        "height": 400,
+        "width": 940,
+        "color": 4
+      },
+      "id": "54e7b369-4519-47d8-b4db-9a92bf672235",
+      "name": "Como ativar",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        -620
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### CRM (a definir)\nQuando escolherem o CRM, troquem o nó **CRM (a definir)** pelo nó do CRM (HubSpot, Pipedrive, RD Station etc.) e ativem.\n\nOs dados já vêm prontos em:\n`{{ $('Prepara lead').item.json.crm.nome }}`\nCampos: nome, email, telefone, empresa, cnpj, cidade, perfil, origem, metragem_total_m, analise_comercial, titulo, observacoes.",
+        "height": 260,
+        "width": 420,
+        "color": 6
+      },
+      "id": "f73f3ea8-b635-4e3c-9ffd-2a6770d8d76f",
+      "name": "Nota CRM",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1160,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lp-newcabos-cotacao",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "97c82f53-457c-42f6-80d8-603018546d08",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "cef20a8c-058a-4cf6-8597-a17e2477badf"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Valida e organiza o lead que chega do formulário da LP (assets/js/app.js → montaLead).\n// Saída: valido/erro, dados do e-mail, linha da planilha e dados prontos para o CRM.\nconst txt = (v, max = 200) => String(v ?? '').replace(/\\s+/g, ' ').trim().slice(0, max);\nconst esc = (s) => String(s ?? '').replace(/[&<>\"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', \"'\": '&#39;' }[c]));\nconst num = (n) => String(Math.round(Number(n) || 0)).replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\nconst digitos = (v) => String(v ?? '').replace(/\\D/g, '');\nconst agora = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });\n\nreturn $input.all().map((item) => {\n  let b = item.json.body ?? {};\n  if (typeof b === 'string') { try { b = JSON.parse(b); } catch { b = {}; } }\n\n  const lead = {\n    nome: txt(b.nome, 120),\n    tipo: b.tipo_pessoa === 'PJ' ? 'PJ' : 'PF',\n    cnpj: txt(b.cnpj, 20),\n    razao: txt(b.razao_social, 150),\n    cidade: txt(b.cidade, 80),\n    telefone: txt(b.telefone, 30),\n    email: txt(b.email, 150).toLowerCase(),\n    perfil: txt(b.perfil, 40),\n    mensagem: String(b.mensagem ?? '').trim().slice(0, 1000),\n    pagina: txt(b.pagina, 500),\n    utm: Object.fromEntries(['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid', 'fbclid'].map((k) => [k, txt(b[k], 200)])),\n  };\n\n  const produtos = (Array.isArray(b.produtos) ? b.produtos : []).slice(0, 50).map((p) => {\n    const porUnidade = Number(p.metragem_por_unidade_m) || Number(digitos(p.metragem_m)) || 0;\n    const quantidade = Number(p.quantidade) || 1;\n    const ac = p.acondicionamento || {};\n    return {\n      bitola: txt(p.bitola_mm2, 10),\n      cor: txt(p.cor, 30),\n      quantidade,\n      porUnidade,\n      total: Number(p.metragem_total_m) || porUnidade * quantidade,\n      padrao: txt(ac.padrao, 30),\n      solicitado: txt(ac.solicitado, 30),\n      analise: Boolean(ac.analise),\n    };\n  });\n\n  const erros = [];\n  if (!lead.nome) erros.push('nome');\n  if (digitos(lead.telefone).length < 10) erros.push('telefone');\n  if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/.test(lead.email)) erros.push('email');\n  if (lead.tipo === 'PJ' && digitos(lead.cnpj).length !== 14) erros.push('cnpj');\n  if (!produtos.length) erros.push('produtos');\n  if (erros.length) return { json: { valido: false, erro: `Campos inválidos: ${erros.join(', ')}` } };\n\n  const metragemTotal = produtos.reduce((s, p) => s + p.total, 0);\n  const temAnalise = produtos.some((p) => p.analise);\n  const embalagem = (p) => [p.padrao ? `${p.padrao} (padrão)` : 'sem padrão', p.solicitado ? `solicitado: ${p.solicitado}` : '', p.analise ? 'ANÁLISE COMERCIAL' : ''].filter(Boolean).join(' · ');\n  const linhaProduto = (p) => `${p.bitola} mm² · ${p.cor} · ${num(p.quantidade)} × ${num(p.porUnidade)} m = ${num(p.total)} m · ${embalagem(p)}`;\n  const origem = [lead.utm.utm_source, lead.utm.utm_medium, lead.utm.utm_campaign].filter(Boolean).join(' / ') || (lead.utm.gclid ? 'Google Ads' : lead.utm.fbclid ? 'Meta Ads' : 'Direto');\n\n  const dadosCliente = [\n    ['Nome', lead.nome],\n    ['Tipo', lead.tipo === 'PJ' ? 'Pessoa jurídica' : 'Pessoa física'],\n    lead.tipo === 'PJ' ? ['CNPJ', lead.cnpj + (lead.razao ? ` — ${lead.razao}` : '')] : null,\n    lead.cidade ? ['Cidade', lead.cidade] : null,\n    ['Telefone', lead.telefone],\n    ['E-mail', lead.email],\n    ['Perfil', lead.perfil],\n    ['Origem', origem],\n    ['Recebido em', agora],\n  ].filter(Boolean);\n\n  const td = 'padding:6px 10px;border:1px solid #dde3ea;font-size:14px;vertical-align:top';\n  const html = `<div style=\"font-family:Arial,Helvetica,sans-serif;color:#10233D;max-width:720px\">\n<h2 style=\"margin:0 0 4px;color:#F08000\">Novo pedido de cotação — LP New Cabos</h2>\n<p style=\"margin:0 0 16px;font-size:13px;color:#555\">Para responder ao cliente, use “Responder”: o e-mail vai direto para ${esc(lead.email)}.</p>\n<table style=\"border-collapse:collapse;margin-bottom:16px\">${dadosCliente.map(([k, v]) => `<tr><th style=\"${td};text-align:left;background:#f4f7fa\">${esc(k)}</th><td style=\"${td}\">${esc(v)}</td></tr>`).join('')}</table>\n<h3 style=\"margin:0 0 8px\">Produtos (${produtos.length}) · total ${num(metragemTotal)} m</h3>\n<table style=\"border-collapse:collapse;margin-bottom:16px\"><tr>${['Bitola', 'Cor', 'Qtd.', 'm/unid.', 'Total', 'Acondicionamento'].map((h) => `<th style=\"${td};background:#10233D;color:#fff;text-align:left\">${h}</th>`).join('')}</tr>\n${produtos.map((p) => `<tr><td style=\"${td}\">${esc(p.bitola)} mm²</td><td style=\"${td}\">${esc(p.cor)}</td><td style=\"${td}\">${num(p.quantidade)}</td><td style=\"${td}\">${num(p.porUnidade)} m</td><td style=\"${td}\">${num(p.total)} m</td><td style=\"${td}\">${esc(embalagem(p))}</td></tr>`).join('\\n')}</table>\n${temAnalise ? '<p style=\"padding:8px 12px;background:#FFF4E0;border-left:4px solid #F5A11E;font-size:14px\">Há item que exige análise comercial e produtiva (metragem fora do padrão, 16 mm² ou embalagem diferente da padrão).</p>' : ''}\n${lead.mensagem ? `<h3 style=\"margin:16px 0 8px\">Sobre a obra/pedido</h3><p style=\"white-space:pre-wrap;font-size:14px;margin:0\">${esc(lead.mensagem)}</p>` : ''}\n<p style=\"margin-top:24px;font-size:12px;color:#888\">Página: ${esc(lead.pagina)}</p>\n</div>`;\n\n  const resumo = [\n    `Nome: ${lead.nome}`,\n    `Tipo: ${lead.tipo}${lead.tipo === 'PJ' ? ` · CNPJ ${lead.cnpj}${lead.razao ? ` — ${lead.razao}` : ''}` : ''}`,\n    `Telefone: ${lead.telefone} · E-mail: ${lead.email}`,\n    `Perfil: ${lead.perfil} · Origem: ${origem}`,\n    '',\n    ...produtos.map((p) => `• ${linhaProduto(p)}`),\n    `Total: ${num(metragemTotal)} m`,\n    lead.mensagem ? `\\nSobre a obra/pedido:\\n${lead.mensagem}` : '',\n  ].join('\\n').trim();\n\n  return {\n    json: {\n      valido: true,\n      email: {\n        assunto: `Nova cotação LP — ${lead.razao || lead.nome} · ${num(metragemTotal)} m${temAnalise ? ' · análise' : ''}`,\n        replyTo: lead.email,\n        html,\n      },\n      planilha: {\n        'Data': agora,\n        'Nome': lead.nome,\n        'Tipo': lead.tipo,\n        'CNPJ': lead.cnpj,\n        'Razão social': lead.razao,\n        'Cidade': lead.cidade,\n        'Telefone': lead.telefone,\n        'E-mail': lead.email,\n        'Perfil': lead.perfil,\n        'Produtos': produtos.map(linhaProduto).join('\\n'),\n        'Metragem total (m)': metragemTotal,\n        'Análise comercial': temAnalise ? 'Sim' : 'Não',\n        'Mensagem': lead.mensagem,\n        'Origem': origem,\n        'Página': lead.pagina,\n        ...lead.utm,\n      },\n      crm: {\n        nome: lead.nome,\n        email: lead.email,\n        telefone: lead.telefone,\n        empresa: lead.razao,\n        cnpj: lead.cnpj,\n        cidade: lead.cidade,\n        perfil: lead.perfil,\n        origem,\n        metragem_total_m: metragemTotal,\n        analise_comercial: temAnalise,\n        titulo: `Cotação LP — ${lead.razao || lead.nome}`,\n        observacoes: resumo,\n      },\n    },\n  };\n});\n"
+      },
+      "id": "507766c6-7b76-4ffa-b8fe-5c5ea5f68ba3",
+      "name": "Prepara lead",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "63dc4384-c8f8-49e7-a460-e1576c012fa5",
+              "leftValue": "={{ $json.valido }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "623deaaa-4828-48ee-ac4d-44e29b3e4c94",
+      "name": "Lead válido?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "New Cabos LP <contato@newcabos.com.br>",
+        "toEmail": "contato@newcabos.com.br",
+        "subject": "={{ $json.email.assunto }}",
+        "emailFormat": "html",
+        "html": "={{ $json.email.html }}",
+        "options": {
+          "appendAttribution": false,
+          "replyTo": "={{ $json.email.replyTo }}"
+        }
+      },
+      "id": "ff466b6e-8aea-4225-bcfa-3d2f48479ac6",
+      "name": "Envia e-mail",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        680,
+        -100
+      ],
+      "onError": "continueErrorOutput",
+      "notes": "Credencial SMTP: configurar. From Email deve ser da conta SMTP."
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"ok\": true\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "153ea77b-1ba5-4d2d-b08c-03931d6e6969",
+      "name": "Responde OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        920,
+        -200
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"ok\": false,\n  \"erro\": \"Falha ao enviar o e-mail\"\n}",
+        "options": {
+          "responseCode": 500
+        }
+      },
+      "id": "c9875373-fd42-4b6e-8222-0f5988743131",
+      "name": "Responde falha no e-mail",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        920,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: false, erro: $json.erro }) }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "bae2ca8a-617d-4fcf-9b93-11ae0d9d7c4d",
+      "name": "Responde dados inválidos",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        680,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Uma linha por lead, com as colunas da planilha.\nreturn $('Prepara lead').all().filter((i) => i.json.valido).map((i) => ({ json: i.json.planilha }));"
+      },
+      "id": "3d1e1287-c680-49df-a656-f0fa51ee2e6e",
+      "name": "Linha da planilha",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1160,
+        -300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": ""
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "d89ab495-fe13-4d06-bd71-aa8b8ea4cdd3",
+      "name": "Grava na planilha",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1380,
+        -300
+      ],
+      "onError": "continueRegularOutput",
+      "notes": "Conectar a conta Google e escolher planilha e aba. Se falhar, o e-mail já foi enviado."
+    },
+    {
+      "parameters": {},
+      "id": "ef60681e-627a-4bce-b83a-ddf002c9830f",
+      "name": "CRM (a definir)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        -100
+      ],
+      "disabled": true,
+      "notes": "Trocar pelo nó do CRM quando for definido."
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepara lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepara lead": {
+      "main": [
+        [
+          {
+            "node": "Lead válido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead válido?": {
+      "main": [
+        [
+          {
+            "node": "Envia e-mail",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responde dados inválidos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Envia e-mail": {
+      "main": [
+        [
+          {
+            "node": "Responde OK",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responde falha no e-mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Responde OK": {
+      "main": [
+        [
+          {
+            "node": "Linha da planilha",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "CRM (a definir)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Linha da planilha": {
+      "main": [
+        [
+          {
+            "node": "Grava na planilha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

@@ -10,6 +10,7 @@ assets/css/styles.css
 assets/js/app.js
 assets/img/favicon.svg · og-cover.png
 robots.txt · sitemap.xml
+n8n/fluxo-leads-lp.json · cabecalho-planilha.csv   (automação dos leads; fora do site, ver .vercelignore)
 ```
 
 ---
@@ -57,13 +58,40 @@ fica em `CONFIG.webhook`, no topo de `assets/js/app.js`.
 visitante vê uma mensagem de erro com o telefone e o e-mail da New Cabos.
 
 Campos enviados: `origem`, `enviado_em`, `pagina`, `perfil`, `produtos`
-(lista com `bitola_mm2`, `metragem_m`, `cor`), `nome`, `tipo_pessoa`, `cnpj`,
+(lista com `bitola_mm2`, `metragem_m`, `metragem_por_unidade_m`, `quantidade`,
+`metragem_total_m`, `cor` e `acondicionamento`), `nome`, `tipo_pessoa`, `cnpj`,
 `razao_social`, `cidade`, `telefone`, `email`, `mensagem`, `resumo` (texto
 pronto) e, se vierem na URL, `utm_*`, `gclid` e `fbclid`.
 
-O destino solicitado para os leads é **contato@newcabos.com.br**, por e-mail. O site estático não envia e-mails diretamente: é necessário configurar o fluxo n8n para receber o JSON e enviar o conteúdo de `resumo`, incluindo os dados do cliente e dos produtos, para esse endereço fixo. O endereço do cliente (`email`) deve ser usado como Reply-To. Não é necessário gravar os leads em planilha.
+### Fluxo do n8n (pasta `n8n/`)
 
-O nó Webhook deve aceitar POST e responder com sucesso somente após o envio de e-mail ser aceito pelo provedor. Configure as credenciais de e-mail exclusivamente no n8n, nunca no JavaScript público. Em caso de erro, o visitante deve receber a mensagem de falha. **O webhook permanece vazio no repositório; a entrega real por e-mail ainda depende dessa configuração externa.**
+`n8n/fluxo-leads-lp.json` é o fluxo pronto para importar no n8n (no editor:
+menu **⋯ → Import from File**). A cada pedido de cotação ele:
+
+1. recebe o POST em `/webhook/lp-newcabos-cotacao`;
+2. valida nome, telefone, e-mail, CNPJ (se PJ) e produtos. Dados inválidos
+   voltam com erro 400;
+3. envia o pedido por e-mail para **contato@newcabos.com.br**, com o e-mail do
+   cliente como Reply-To. O site só mostra "enviado" depois que o e-mail é
+   aceito pelo provedor. Se o envio falhar, o n8n responde 500 e o visitante
+   vê a mensagem de erro com telefone e e-mail;
+4. grava uma linha numa planilha do Google Sheets. Os cabeçalhos da linha 1
+   estão em `n8n/cabecalho-planilha.csv`. Se a planilha falhar, o lead não se
+   perde: o e-mail já saiu;
+5. passa por um nó **CRM (a definir)**, desligado, com os dados do lead já
+   formatados. Basta trocá-lo pelo nó do CRM quando ele for escolhido.
+
+Para ativar no n8n:
+
+1. no nó **Envia e-mail**, criar a credencial SMTP da conta que vai enviar e
+   trocar o **From Email** para o endereço dessa conta;
+2. no nó **Grava na planilha**, conectar a conta Google e escolher planilha e
+   aba (com os cabeçalhos do CSV na linha 1);
+3. salvar e ativar o fluxo;
+4. copiar a **Production URL** do nó **Webhook** e colar em `CONFIG.webhook`.
+
+As credenciais (SMTP, Google, CRM) ficam só no n8n, nunca no JavaScript
+público.
 
 ---
 
