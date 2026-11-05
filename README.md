@@ -98,7 +98,7 @@ público.
 ## Acessibilidade e performance
 
 - Sem framework, sem jQuery: ~55 KB de CSS + JS somados, não minificados.
-- Única requisição externa: Google Fonts (Inter + Sora).
+- Serviços externos: Google Fonts (Inter + Sora) e Google Tag Manager (`GTM-NS7KJD3S`).
 - Navegação por teclado, `aria-*` nas abas e no formulário, skip link,
   `prefers-reduced-motion` respeitado em todas as animações.
 - Sem scroll horizontal de 390 px a 1440 px+ (verificado em Chromium).
